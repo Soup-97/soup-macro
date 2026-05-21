@@ -13,8 +13,8 @@ from pynput.keyboard import Key, Controller, Listener
 
 # ── Version & Update-Config ────────────────────────────────
 VERSION      = "1.0"
-GITHUB_USER  = "DEIN_NAME"        # <-- GitHub Nutzername eintragen
-GITHUB_REPO  = "soup-macro"       # <-- GitHub Repo-Name eintragen
+GITHUB_USER  = "FunkelVult"
+GITHUB_REPO  = "soup-macro"
 VERSION_URL  = f"https://raw.githubusercontent.com/{GITHUB_USER}/{GITHUB_REPO}/main/version.txt"
 RELEASE_URL  = f"https://api.github.com/repos/{GITHUB_USER}/{GITHUB_REPO}/releases/latest"
 
