@@ -3,337 +3,877 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Soup Macro</title>
+  <title>Soup Macro — Macro-Tool für Windows</title>
   <style>
+    /* ── Reset & Base ─────────────────────────────────────── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
     :root {
-      --bg:       #0b0b13;
-      --card:     #13131f;
-      --border:   #252538;
-      --green:    #27c96a;
-      --blue:     #5b9cf6;
-      --purple:   #a78bfa;
-      --red:      #e05252;
-      --orange:   #f0a040;
-      --text:     #dde2ff;
-      --subtext:  #60607a;
+      --bg:      #070712;
+      --card:    #0e0e20;
+      --border:  #1a1a35;
+      --border2: #252548;
+      --green:   #34d399;
+      --blue:    #818cf8;
+      --purple:  #c084fc;
+      --red:     #f87171;
+      --orange:  #fb923c;
+      --amber:   #fbbf24;
+      --text:    #eef2ff;
+      --muted:   #4a5280;
+      --muted2:  #6b7aaa;
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
 
     body {
       background: var(--bg);
       color: var(--text);
       font-family: "Segoe UI", system-ui, sans-serif;
-      min-height: 100vh;
+      overflow-x: hidden;
     }
 
-    /* ── Nav ─────────────────────────────────────────── */
-    nav {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 18px 40px;
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      background: var(--bg);
-      z-index: 10;
+    /* ── Animated background ──────────────────────────────── */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% -10%, #c084fc18 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 110%, #818cf818 0%, transparent 60%),
+        radial-gradient(ellipse 50% 50% at 50% 50%,  #34d39908 0%, transparent 70%);
+      animation: bgPulse 8s ease-in-out infinite alternate;
+      pointer-events: none;
+      z-index: 0;
     }
-    nav img { width: 32px; image-rendering: pixelated; }
-    nav span { font-size: 18px; font-weight: 700; }
-    nav a {
-      margin-left: auto;
-      color: var(--subtext);
-      text-decoration: none;
-      font-size: 14px;
-      transition: color .2s;
-    }
-    nav a:hover { color: var(--text); }
-
-    /* ── Hero ────────────────────────────────────────── */
-    .hero {
-      text-align: center;
-      padding: 90px 20px 70px;
-    }
-    .hero img {
-      width: 96px;
-      image-rendering: pixelated;
-      margin-bottom: 24px;
-      filter: drop-shadow(0 0 24px #a78bfa55);
-    }
-    .hero h1 {
-      font-size: clamp(40px, 6vw, 64px);
-      font-weight: 800;
-      background: linear-gradient(135deg, var(--purple), var(--blue));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 16px;
-    }
-    .hero p {
-      font-size: 18px;
-      color: var(--subtext);
-      max-width: 520px;
-      margin: 0 auto 36px;
-      line-height: 1.6;
-    }
-    .btn-download {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: var(--green);
-      color: #0b0b13;
-      font-size: 16px;
-      font-weight: 700;
-      padding: 14px 32px;
-      border-radius: 8px;
-      text-decoration: none;
-      transition: filter .2s, transform .1s;
-    }
-    .btn-download:hover { filter: brightness(1.15); transform: translateY(-1px); }
-    .btn-download svg { width: 20px; height: 20px; }
-
-    .badge {
-      display: inline-block;
-      margin-top: 14px;
-      font-size: 12px;
-      color: var(--subtext);
+    @keyframes bgPulse {
+      0%   { opacity: .6; }
+      100% { opacity: 1; }
     }
 
-    /* ── Features ────────────────────────────────────── */
-    .section {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 60px 20px;
-    }
-    .section h2 {
-      font-size: 28px;
-      font-weight: 700;
-      margin-bottom: 32px;
-      text-align: center;
-      color: var(--text);
-    }
-
-    .features {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 16px;
-    }
-    .feature-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 24px 22px;
-      transition: border-color .2s;
-    }
-    .feature-card:hover { border-color: var(--purple); }
-    .feature-icon {
-      font-size: 28px;
-      margin-bottom: 12px;
-    }
-    .feature-card h3 {
-      font-size: 16px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      color: var(--text);
-    }
-    .feature-card p {
-      font-size: 14px;
-      color: var(--subtext);
-      line-height: 1.6;
-    }
-
-    /* ── Hotkeys ─────────────────────────────────────── */
-    .hotkeys {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 8px;
-    }
-    .hotkey {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 16px 24px;
-      text-align: center;
-      min-width: 130px;
-    }
-    .key {
-      display: inline-block;
-      background: var(--border);
-      border-radius: 5px;
-      padding: 4px 10px;
-      font-size: 15px;
-      font-weight: 700;
-      font-family: monospace;
-      margin-bottom: 8px;
-    }
-    .key.green  { background: #27c96a22; color: var(--green); border: 1px solid var(--green); }
-    .key.blue   { background: #5b9cf622; color: var(--blue);  border: 1px solid var(--blue);  }
-    .key.purple { background: #a78bfa22; color: var(--purple);border: 1px solid var(--purple);}
-    .key.red    { background: #e0525222; color: var(--red);   border: 1px solid var(--red);   }
-    .hotkey p { font-size: 13px; color: var(--subtext); }
-
-    /* ── Install ─────────────────────────────────────── */
-    .steps {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      max-width: 560px;
-      margin: 0 auto;
-    }
-    .step {
-      display: flex;
-      align-items: flex-start;
-      gap: 16px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 18px 20px;
-    }
-    .step-num {
-      width: 32px;
-      height: 32px;
+    /* ── Floating orbs ────────────────────────────────────── */
+    .orbs { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .orb {
+      position: absolute;
       border-radius: 50%;
-      background: linear-gradient(135deg, var(--purple), var(--blue));
-      color: #0b0b13;
-      font-weight: 800;
-      font-size: 15px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      filter: blur(80px);
+      opacity: .12;
+      animation: drift linear infinite;
+    }
+    .orb:nth-child(1) { width:500px;height:500px;background:var(--purple);top:-200px;left:-100px;animation-duration:20s; }
+    .orb:nth-child(2) { width:400px;height:400px;background:var(--blue);top:40%;right:-150px;animation-duration:25s;animation-delay:-8s; }
+    .orb:nth-child(3) { width:350px;height:350px;background:var(--green);bottom:-100px;left:30%;animation-duration:18s;animation-delay:-4s; }
+    @keyframes drift {
+      0%,100% { transform: translate(0,0) scale(1); }
+      33%      { transform: translate(30px,-20px) scale(1.05); }
+      66%      { transform: translate(-20px,30px) scale(.95); }
+    }
+
+    /* ── Nav ─────────────────────────────────────────────── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; gap: 16px;
+      padding: 16px 48px;
+      background: rgba(7,7,18,.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; }
+    .nav-logo img { width: 28px; image-rendering: pixelated; }
+    .nav-logo span { font-size: 16px; font-weight: 700; color: var(--text); }
+    .nav-links { display: flex; gap: 28px; margin-left: auto; }
+    .nav-links a {
+      color: var(--muted2); text-decoration: none;
+      font-size: 14px; transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-btn {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--green); color: #07071200;
+      padding: 8px 18px; border-radius: 8px;
+      font-weight: 700; font-size: 13px;
+      text-decoration: none; color: #07071a;
+      transition: filter .2s, transform .15s;
       flex-shrink: 0;
     }
-    .step p { font-size: 15px; color: var(--text); line-height: 1.5; padding-top: 4px; }
-    .step p span { color: var(--subtext); font-size: 13px; display: block; margin-top: 2px; }
+    .nav-btn:hover { filter: brightness(1.15); transform: translateY(-1px); }
 
-    /* ── Footer ──────────────────────────────────────── */
-    footer {
-      border-top: 1px solid var(--border);
+    /* ── Hero ────────────────────────────────────────────── */
+    .hero {
+      position: relative; z-index: 1;
       text-align: center;
-      padding: 30px 20px;
-      color: var(--subtext);
-      font-size: 13px;
+      padding: 120px 20px 100px;
     }
-    footer a { color: var(--blue); text-decoration: none; }
-    footer a:hover { text-decoration: underline; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(192,132,252,.12);
+      border: 1px solid rgba(192,132,252,.3);
+      color: var(--purple); font-size: 13px; font-weight: 600;
+      padding: 6px 16px; border-radius: 100px;
+      margin-bottom: 28px;
+      animation: fadeDown .6s ease both;
+    }
+    .hero-badge::before {
+      content: ""; width: 6px; height: 6px;
+      border-radius: 50%; background: var(--purple);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: .5; transform: scale(.8); }
+    }
+
+    .hero-logo {
+      width: 100px; image-rendering: pixelated;
+      margin-bottom: 32px;
+      filter: drop-shadow(0 0 40px rgba(192,132,252,.4));
+      animation: fadeDown .6s .1s ease both, float 4s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-10px); }
+    }
+
+    .hero h1 {
+      font-size: clamp(44px, 7vw, 72px);
+      font-weight: 900; line-height: 1.1;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #eef2ff 0%, var(--purple) 50%, var(--blue) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+      animation: fadeDown .6s .2s ease both;
+    }
+
+    .hero-sub {
+      font-size: 18px; color: var(--muted2);
+      max-width: 540px; margin: 0 auto 48px;
+      line-height: 1.7;
+      animation: fadeDown .6s .3s ease both;
+    }
+
+    .hero-actions {
+      display: flex; justify-content: center;
+      align-items: center; gap: 16px; flex-wrap: wrap;
+      animation: fadeDown .6s .4s ease both;
+    }
+
+    .btn-dl {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: linear-gradient(135deg, var(--green), #059669);
+      color: #07071a; font-size: 16px; font-weight: 800;
+      padding: 16px 36px; border-radius: 12px;
+      text-decoration: none;
+      box-shadow: 0 0 40px rgba(52,211,153,.3);
+      transition: transform .2s, box-shadow .2s, filter .2s;
+      position: relative; overflow: hidden;
+    }
+    .btn-dl::before {
+      content: ""; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,.2), transparent);
+      opacity: 0; transition: opacity .2s;
+    }
+    .btn-dl:hover { transform: translateY(-2px); filter: brightness(1.1);
+      box-shadow: 0 0 60px rgba(52,211,153,.5); }
+    .btn-dl:hover::before { opacity: 1; }
+    .btn-dl svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+    .btn-gh {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--border2);
+      color: var(--muted2); font-size: 15px; font-weight: 600;
+      padding: 15px 28px; border-radius: 12px;
+      text-decoration: none;
+      transition: background .2s, color .2s, border-color .2s;
+    }
+    .btn-gh:hover { background: rgba(255,255,255,.1); color: var(--text);
+      border-color: var(--muted); }
+
+    .hero-meta {
+      margin-top: 20px; font-size: 12px; color: var(--muted);
+      animation: fadeDown .6s .5s ease both;
+    }
+    .hero-meta span {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin: 0 10px;
+    }
+    .hero-meta span::before {
+      content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--muted);
+    }
+
+    /* ── Screenshot mockup ───────────────────────────────── */
+    .mockup-wrap {
+      position: relative; z-index: 1;
+      max-width: 620px; margin: 60px auto 0;
+      animation: fadeUp .8s .5s ease both;
+    }
+    .mockup-glow {
+      position: absolute; inset: -40px;
+      background: radial-gradient(ellipse at center, rgba(192,132,252,.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .mockup {
+      background: var(--card);
+      border: 1px solid var(--border2);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 40px 100px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.05);
+    }
+    .mockup-bar {
+      background: rgba(255,255,255,.04);
+      padding: 12px 16px;
+      display: flex; align-items: center; gap: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .mockup-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+    }
+    .mockup-bar-title {
+      flex: 1; text-align: center;
+      font-size: 13px; color: var(--muted2); font-weight: 500;
+    }
+    .mockup-tabs {
+      display: flex;
+      background: rgba(255,255,255,.03);
+      border-bottom: 1px solid var(--border);
+    }
+    .mockup-tab {
+      flex: 1; padding: 10px 8px; text-align: center;
+      font-size: 11px; color: var(--muted); font-weight: 600;
+      position: relative;
+    }
+    .mockup-tab.active { color: var(--text); }
+    .mockup-tab.active::after {
+      content: ""; position: absolute; bottom: 0; left: 10%; right: 10%;
+      height: 2px; background: var(--green); border-radius: 2px 2px 0 0;
+    }
+    .mockup-content { padding: 16px; }
+    .mockup-card {
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px;
+    }
+    .mockup-label {
+      font-size: 10px; font-weight: 700; color: var(--muted2);
+      text-transform: uppercase; letter-spacing: .8px; margin-bottom: 10px;
+    }
+    .mockup-row { display: flex; gap: 8px; margin-bottom: 8px; }
+    .mockup-input {
+      flex: 1; background: rgba(0,0,0,.4); border: 1px solid var(--border2);
+      border-radius: 6px; padding: 7px 10px;
+      font-size: 12px; color: var(--text);
+    }
+    .mockup-chips { display: flex; gap: 6px; margin-bottom: 12px; }
+    .mockup-chip {
+      padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: 700;
+    }
+    .mockup-btn {
+      width: 100%; padding: 10px;
+      border-radius: 8px; text-align: center;
+      font-size: 13px; font-weight: 700;
+      background: var(--green); color: #07071a;
+    }
+    .mockup-status {
+      display: flex; align-items: center; gap: 6px;
+      margin-top: 10px; font-size: 11px;
+    }
+    .mockup-dot-sm {
+      width: 7px; height: 7px; border-radius: 50%;
+    }
+    .mockup-stopbar {
+      margin: 12px; padding: 10px;
+      background: rgba(248,113,113,.15); border: 1px solid rgba(248,113,113,.3);
+      border-radius: 8px; text-align: center;
+      font-size: 12px; font-weight: 700; color: var(--red);
+    }
+
+    /* ── Stats ───────────────────────────────────────────── */
+    .stats {
+      position: relative; z-index: 1;
+      display: flex; justify-content: center;
+      gap: 48px; flex-wrap: wrap;
+      padding: 60px 20px;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      max-width: 900px; margin: 0 auto;
+    }
+    .stat { text-align: center; }
+    .stat-num {
+      font-size: 42px; font-weight: 900;
+      background: linear-gradient(135deg, var(--text), var(--purple));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; line-height: 1;
+    }
+    .stat-lbl { font-size: 13px; color: var(--muted2); margin-top: 6px; }
+
+    /* ── Section ─────────────────────────────────────────── */
+    .section {
+      position: relative; z-index: 1;
+      max-width: 980px; margin: 0 auto;
+      padding: 80px 24px;
+    }
+    .section-eyebrow {
+      display: inline-block;
+      font-size: 12px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--purple);
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 800; line-height: 1.2;
+      margin-bottom: 16px;
+    }
+    .section-sub {
+      font-size: 16px; color: var(--muted2);
+      max-width: 560px; line-height: 1.7; margin-bottom: 48px;
+    }
+
+    /* ── Feature grid ────────────────────────────────────── */
+    .feat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .feat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px; padding: 28px 26px;
+      position: relative; overflow: hidden;
+      transition: border-color .3s, transform .3s, box-shadow .3s;
+      cursor: default;
+    }
+    .feat-card::before {
+      content: "";
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, var(--accent-a, transparent) 0%, transparent 60%);
+      opacity: 0; transition: opacity .3s;
+    }
+    .feat-card:hover {
+      border-color: var(--accent-b, var(--purple));
+      transform: translateY(-4px);
+      box-shadow: 0 20px 60px rgba(0,0,0,.4);
+    }
+    .feat-card:hover::before { opacity: 1; }
+    .feat-icon {
+      font-size: 32px; margin-bottom: 16px;
+      display: inline-block;
+      transition: transform .3s;
+    }
+    .feat-card:hover .feat-icon { transform: scale(1.15); }
+    .feat-card h3 {
+      font-size: 17px; font-weight: 700;
+      margin-bottom: 10px; color: var(--text);
+    }
+    .feat-card p {
+      font-size: 14px; color: var(--muted2); line-height: 1.7;
+    }
+    .feat-tag {
+      display: inline-block; margin-top: 14px;
+      font-size: 11px; font-weight: 700;
+      padding: 3px 10px; border-radius: 100px;
+    }
+
+    /* ── Hotkeys ─────────────────────────────────────────── */
+    .hk-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .hk-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px 16px;
+      text-align: center;
+      transition: border-color .2s, transform .2s;
+    }
+    .hk-card:hover { transform: translateY(-3px); }
+    .key-badge {
+      display: inline-block;
+      padding: 6px 16px; border-radius: 8px;
+      font-size: 16px; font-weight: 800;
+      font-family: "Cascadia Code", "Consolas", monospace;
+      margin-bottom: 10px;
+      border: 1px solid;
+    }
+    .hk-card p { font-size: 13px; color: var(--muted2); }
+
+    /* ── Install steps ───────────────────────────────────── */
+    .install-steps {
+      display: flex; flex-direction: column; gap: 12px;
+      max-width: 600px; margin: 0 auto;
+    }
+    .step {
+      display: flex; align-items: flex-start; gap: 20px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 20px 24px;
+      transition: border-color .2s, transform .2s;
+    }
+    .step:hover { border-color: var(--border2); transform: translateX(4px); }
+    .step-num {
+      width: 36px; height: 36px; flex-shrink: 0;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      color: #07071a; font-weight: 800; font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .step-body h4 {
+      font-size: 15px; font-weight: 700; margin-bottom: 4px;
+    }
+    .step-body p { font-size: 13px; color: var(--muted2); line-height: 1.5; }
+    .step-body code {
+      font-size: 12px; color: var(--green);
+      background: rgba(52,211,153,.1); padding: 1px 6px;
+      border-radius: 4px; font-family: monospace;
+    }
+
+    /* ── Scroll-reveal ───────────────────────────────────── */
+    .reveal {
+      opacity: 0; transform: translateY(30px);
+      transition: opacity .7s ease, transform .7s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-left {
+      opacity: 0; transform: translateX(-30px);
+      transition: opacity .7s ease, transform .7s ease;
+    }
+    .reveal-left.visible { opacity: 1; transform: translateX(0); }
+
+    /* ── Stagger children ────────────────────────────────── */
+    .stagger > * { opacity: 0; transform: translateY(24px);
+      transition: opacity .5s ease, transform .5s ease; }
+    .stagger.visible > *:nth-child(1) { opacity:1;transform:none;transition-delay:.0s; }
+    .stagger.visible > *:nth-child(2) { opacity:1;transform:none;transition-delay:.1s; }
+    .stagger.visible > *:nth-child(3) { opacity:1;transform:none;transition-delay:.2s; }
+    .stagger.visible > *:nth-child(4) { opacity:1;transform:none;transition-delay:.3s; }
+    .stagger.visible > *:nth-child(5) { opacity:1;transform:none;transition-delay:.4s; }
+    .stagger.visible > *:nth-child(6) { opacity:1;transform:none;transition-delay:.5s; }
+    .stagger.visible > *:nth-child(n+7) { opacity:1;transform:none;transition-delay:.5s; }
+
+    /* ── Smartscreen notice ──────────────────────────────── */
+    .notice {
+      background: rgba(251,191,36,.08);
+      border: 1px solid rgba(251,191,36,.25);
+      border-radius: 12px; padding: 16px 20px;
+      display: flex; gap: 12px; align-items: flex-start;
+      margin-top: 24px; max-width: 600px; margin-inline: auto;
+      font-size: 13px; color: var(--muted2); line-height: 1.6;
+    }
+    .notice-icon { font-size: 18px; flex-shrink: 0; }
+    .notice strong { color: var(--amber); }
+
+    /* ── CTA ─────────────────────────────────────────────── */
+    .cta {
+      position: relative; z-index: 1;
+      text-align: center;
+      padding: 100px 20px;
+      border-top: 1px solid var(--border);
+    }
+    .cta h2 {
+      font-size: clamp(28px, 4vw, 48px);
+      font-weight: 900; margin-bottom: 16px;
+    }
+    .cta p { font-size: 16px; color: var(--muted2); margin-bottom: 40px; }
+
+    /* ── Footer ──────────────────────────────────────────── */
+    footer {
+      position: relative; z-index: 1;
+      border-top: 1px solid var(--border);
+      text-align: center; padding: 32px 20px;
+      font-size: 13px; color: var(--muted);
+    }
+    footer a { color: var(--blue); text-decoration: none; transition: color .2s; }
+    footer a:hover { color: var(--text); }
+
+    /* ── Animations ──────────────────────────────────────── */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Responsive ──────────────────────────────────────── */
+    @media (max-width: 640px) {
+      nav { padding: 14px 20px; }
+      .nav-links { display: none; }
+      .hero { padding: 80px 20px 60px; }
+      .stats { gap: 32px; }
+    }
   </style>
 </head>
 <body>
 
-  <!-- Nav -->
-  <nav>
+<!-- Orbs -->
+<div class="orbs">
+  <div class="orb"></div>
+  <div class="orb"></div>
+  <div class="orb"></div>
+</div>
+
+<!-- Nav -->
+<nav>
+  <div class="nav-logo">
     <img src="https://raw.githubusercontent.com/FunkelVult/soup-macro/main/logo.png" alt="Logo">
     <span>Soup Macro</span>
-    <a href="https://github.com/FunkelVult/soup-macro" target="_blank">GitHub →</a>
-  </nav>
+  </div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#hotkeys">Hotkeys</a>
+    <a href="#install">Installation</a>
+    <a href="https://github.com/FunkelVult/soup-macro" target="_blank">GitHub</a>
+  </div>
+  <a class="nav-btn" href="https://github.com/FunkelVult/soup-macro/releases/latest/download/SoupMacro_Setup.exe">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <path d="M12 5v10M7 15l5 5 5-5M3 19h18"/>
+    </svg>
+    Download
+  </a>
+</nav>
 
-  <!-- Hero -->
-  <div class="hero">
-    <img src="https://raw.githubusercontent.com/FunkelVult/soup-macro/main/logo.png" alt="Soup Macro Logo">
-    <h1>Soup Macro</h1>
-    <p>Leistungsstarkes Macro-Tool mit Spam, Tame-Automatisierung und eigenem Makro-Builder. Kostenlos, kein Python nötig.</p>
-    <a class="btn-download"
-       href="https://github.com/FunkelVult/soup-macro/releases/latest/download/SoupMacro.exe"
-       download>
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-badge">v1.5 — Jetzt verfügbar</div>
+  <br>
+  <img class="hero-logo"
+       src="https://raw.githubusercontent.com/FunkelVult/soup-macro/main/logo.png"
+       alt="Soup Macro Logo">
+  <h1>Soup Macro</h1>
+  <p class="hero-sub">
+    Mächtiges Macro-Tool für Windows — Spam, Tame-Automatisierung,
+    eigene Makros mit Maussteuerung, Aufnahme &amp; Wiedergabe.
+    Kostenlos. Kein Python nötig.
+  </p>
+  <div class="hero-actions">
+    <a class="btn-dl"
+       href="https://github.com/FunkelVult/soup-macro/releases/latest/download/SoupMacro_Setup.exe">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
         <path d="M12 5v10M7 15l5 5 5-5M3 19h18"/>
       </svg>
-      Download — SoupMacro.exe
+      SoupMacro_Setup.exe herunterladen
     </a>
-    <div class="badge">Windows · Kein Python nötig · Startet als Admin</div>
+    <a class="btn-gh" href="https://github.com/FunkelVult/soup-macro" target="_blank">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+      </svg>
+      GitHub
+    </a>
+  </div>
+  <p class="hero-meta">
+    <span>Windows 10 / 11</span>
+    <span>Kein Python nötig</span>
+    <span>Kostenlos &amp; Open Source</span>
+  </p>
+
+  <!-- App mockup -->
+  <div class="mockup-wrap">
+    <div class="mockup-glow"></div>
+    <div class="mockup">
+      <div class="mockup-bar">
+        <div class="mockup-dot" style="background:#f87171"></div>
+        <div class="mockup-dot" style="background:#fbbf24;margin-left:4px"></div>
+        <div class="mockup-dot" style="background:#34d399;margin-left:4px"></div>
+        <span class="mockup-bar-title">Soup Macro — v1.5</span>
+      </div>
+      <div class="mockup-tabs">
+        <div class="mockup-tab active">⚡ SPAM</div>
+        <div class="mockup-tab">🎯 TAME</div>
+        <div class="mockup-tab">🛠 MAKROS</div>
+        <div class="mockup-tab">⏺ AUFNAHME</div>
+        <div class="mockup-tab">⚙ CONFIG</div>
+      </div>
+      <div class="mockup-content">
+        <div class="mockup-card">
+          <div class="mockup-label">● SPAM MODUS</div>
+          <div class="mockup-row">
+            <div class="mockup-input" style="color:#6b7aaa;font-size:11px">Tasten (z.B. 1,e,2)</div>
+            <div class="mockup-input" style="color:#34d399;max-width:80px">1</div>
+          </div>
+          <div class="mockup-chips">
+            <div class="mockup-chip" style="background:rgba(52,211,153,.2);color:#34d399">Fest</div>
+            <div class="mockup-chip" style="background:rgba(255,255,255,.05);color:#4a5280">Zufall</div>
+          </div>
+          <div class="mockup-btn">▶  Start Spam  (F1)</div>
+          <div class="mockup-status">
+            <div class="mockup-dot-sm" style="background:#f87171"></div>
+            <span style="color:#f87171;font-size:11px;font-weight:700">Gestoppt</span>
+          </div>
+        </div>
+      </div>
+      <div class="mockup-stopbar">⏹  ALLE STOPPEN  (F12)</div>
+    </div>
+  </div>
+</section>
+
+<!-- Stats -->
+<div style="position:relative;z-index:1">
+  <div class="stats reveal">
+    <div class="stat">
+      <div class="stat-num" data-count="5">0</div>
+      <div class="stat-lbl">Modi &amp; Tabs</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" data-count="1">0</div>
+      <div class="stat-lbl">ms Intervall (min.)</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" data-count="6">0</div>
+      <div class="stat-lbl">Globale Hotkeys</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" data-suffix="%">100</div>
+      <div class="stat-lbl">Kostenlos</div>
+    </div>
+  </div>
+</div>
+
+<!-- Features -->
+<section class="section" id="features">
+  <div class="reveal" style="text-align:center">
+    <span class="section-eyebrow">Features</span>
+    <h2 class="section-title">Alles was du brauchst</h2>
+    <p class="section-sub" style="margin:0 auto 48px">
+      Von schnellem Spammen bis zu komplexen Makros mit Maussteuerung — alles in einem Tool.
+    </p>
   </div>
 
-  <!-- Features -->
-  <div class="section">
-    <h2>Features</h2>
-    <div class="features">
-      <div class="feature-card">
-        <div class="feature-icon">⚡</div>
-        <h3>Spam Modus</h3>
-        <p>Drückt eine Taste mit einstellbarem Intervall — bis auf 1ms genau. Perfekt für schnelle Wiederholungen.</p>
+  <div class="feat-grid stagger">
+
+    <div class="feat-card"
+         style="--accent-a: rgba(52,211,153,.08); --accent-b: var(--green)">
+      <div class="feat-icon">⚡</div>
+      <h3>Spam Modus</h3>
+      <p>Mehrere Tasten kommagetrennt, festes oder zufälliges Intervall (1ms–5000ms), Hold-Mode und Startverzögerung.</p>
+      <span class="feat-tag" style="background:rgba(52,211,153,.12);color:var(--green)">F1</span>
+    </div>
+
+    <div class="feat-card"
+         style="--accent-a: rgba(129,140,248,.08); --accent-b: var(--blue)">
+      <div class="feat-icon">🎯</div>
+      <h3>Tame Modus</h3>
+      <p>Automatische Tame-Sequenz: Taste 2 → warten → Taste 1 → warten → wiederholen. Wartezeit frei einstellbar.</p>
+      <span class="feat-tag" style="background:rgba(129,140,248,.12);color:var(--blue)">F2</span>
+    </div>
+
+    <div class="feat-card"
+         style="--accent-a: rgba(192,132,252,.08); --accent-b: var(--purple)">
+      <div class="feat-icon">🛠️</div>
+      <h3>Eigene Makros</h3>
+      <p>Tastendruck, Warten, Mausklick an X/Y-Position und Label-Kommentare. Speichern &amp; laden als .json.</p>
+      <span class="feat-tag" style="background:rgba(192,132,252,.12);color:var(--purple)">F3</span>
+    </div>
+
+    <div class="feat-card"
+         style="--accent-a: rgba(248,113,113,.08); --accent-b: var(--red)">
+      <div class="feat-icon">⏺️</div>
+      <h3>Aufnahme &amp; Wiedergabe</h3>
+      <p>Tastatur und Maus aufzeichnen und wiedergeben. Geschwindigkeit 0.5× bis 4×, Mausbewegungen optional.</p>
+      <span class="feat-tag" style="background:rgba(248,113,113,.12);color:var(--red)">F4 / F5</span>
+    </div>
+
+    <div class="feat-card"
+         style="--accent-a: rgba(251,146,60,.08); --accent-b: var(--orange)">
+      <div class="feat-icon">🔄</div>
+      <h3>Auto-Update</h3>
+      <p>Beim Start wird automatisch geprüft ob eine neue Version verfügbar ist — ein Klick installiert sie.</p>
+      <span class="feat-tag" style="background:rgba(251,146,60,.12);color:var(--orange)">Automatisch</span>
+    </div>
+
+    <div class="feat-card"
+         style="--accent-a: rgba(251,191,36,.08); --accent-b: var(--amber)">
+      <div class="feat-icon">⚙️</div>
+      <h3>Einstellungen</h3>
+      <p>Sound-Feedback, konfigurierbarer Panic-Key, Auto-Pause per Fenstername, Overlay, Profile speichern.</p>
+      <span class="feat-tag" style="background:rgba(251,191,36,.12);color:var(--amber)">DE / EN</span>
+    </div>
+
+    <div class="feat-card"
+         style="--accent-a: rgba(52,211,153,.08); --accent-b: var(--green)">
+      <div class="feat-icon">🖥️</div>
+      <h3>System-Tray &amp; Overlay</h3>
+      <p>Fenster schließen minimiert ins Tray. Das Overlay zeigt den Status aller Modi — schwebend &amp; draggable.</p>
+      <span class="feat-tag" style="background:rgba(52,211,153,.12);color:var(--green)">Immer aktiv</span>
+    </div>
+
+    <div class="feat-card"
+         style="--accent-a: rgba(129,140,248,.08); --accent-b: var(--blue)">
+      <div class="feat-icon">📦</div>
+      <h3>Richtiger Installer</h3>
+      <p>Installiert nach Programme, erstellt Shortcuts, Deinstallationseintrag und optional Autostart.</p>
+      <span class="feat-tag" style="background:rgba(129,140,248,.12);color:var(--blue)">Windows Installer</span>
+    </div>
+
+  </div>
+</section>
+
+<!-- Hotkeys -->
+<section class="section" id="hotkeys" style="padding-top:0">
+  <div class="reveal" style="text-align:center">
+    <span class="section-eyebrow">Hotkeys</span>
+    <h2 class="section-title">Alles per Tastendruck</h2>
+    <p class="section-sub" style="margin:0 auto 48px">
+      Alle Modi lassen sich ohne Fokuswechsel steuern — auch während du spielst.
+    </p>
+  </div>
+  <div class="hk-grid stagger">
+    <div class="hk-card" style="border-color:rgba(52,211,153,.2)">
+      <div class="key-badge" style="background:rgba(52,211,153,.12);color:var(--green);border-color:var(--green)">F1</div>
+      <p>Spam an/aus</p>
+    </div>
+    <div class="hk-card" style="border-color:rgba(129,140,248,.2)">
+      <div class="key-badge" style="background:rgba(129,140,248,.12);color:var(--blue);border-color:var(--blue)">F2</div>
+      <p>Tame an/aus</p>
+    </div>
+    <div class="hk-card" style="border-color:rgba(192,132,252,.2)">
+      <div class="key-badge" style="background:rgba(192,132,252,.12);color:var(--purple);border-color:var(--purple)">F3</div>
+      <p>Makro an/aus</p>
+    </div>
+    <div class="hk-card" style="border-color:rgba(248,113,113,.2)">
+      <div class="key-badge" style="background:rgba(248,113,113,.12);color:var(--red);border-color:var(--red)">F4</div>
+      <p>Aufnahme an/aus</p>
+    </div>
+    <div class="hk-card" style="border-color:rgba(52,211,153,.2)">
+      <div class="key-badge" style="background:rgba(52,211,153,.12);color:var(--green);border-color:var(--green)">F5</div>
+      <p>Abspielen an/aus</p>
+    </div>
+    <div class="hk-card" style="border-color:rgba(251,146,60,.2)">
+      <div class="key-badge" style="background:rgba(251,146,60,.12);color:var(--orange);border-color:var(--orange)">Panic*</div>
+      <p>Alles sofort stoppen</p>
+    </div>
+  </div>
+  <p style="text-align:center;margin-top:16px;font-size:12px;color:var(--muted)">
+    * Panic-Key ist frei konfigurierbar (Standard: F12)
+  </p>
+</section>
+
+<!-- Install -->
+<section class="section" id="install" style="padding-top:0">
+  <div class="reveal" style="text-align:center">
+    <span class="section-eyebrow">Installation</span>
+    <h2 class="section-title">In 3 Schritten startklar</h2>
+    <p class="section-sub" style="margin:0 auto 48px">
+      Kein Python, keine Abhängigkeiten — einfach herunterladen und starten.
+    </p>
+  </div>
+
+  <div class="install-steps stagger">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h4>Installer herunterladen</h4>
+        <p>Klicke auf den Download-Button und lade <code>SoupMacro_Setup.exe</code> herunter.</p>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">🎯</div>
-        <h3>Tame Modus</h3>
-        <p>Automatische Tame-Sequenz: Taste 2 drücken, warten, Taste 1 drücken, warten — endlos wiederholen.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h4>Installieren &amp; SmartScreen bestätigen</h4>
+        <p>Windows zeigt ggf. eine SmartScreen-Warnung — auf <strong>„Weitere Informationen" → „Trotzdem ausführen"</strong> klicken. Das ist normal bei Open-Source-Software ohne teure Zertifikate.</p>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">🛠️</div>
-        <h3>Eigene Makros</h3>
-        <p>Baue beliebige Tastenkombinationen mit Wartezeiten. Speichern und laden als .json Datei.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🔄</div>
-        <h3>Auto-Update</h3>
-        <p>Das Programm prüft beim Start automatisch ob eine neue Version verfügbar ist und installiert sie mit einem Klick.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🔑</div>
-        <h3>Hotkeys</h3>
-        <p>Starte und stoppe alle Modi mit F1–F3 und F12, ohne das Fenster zu wechseln.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🎨</div>
-        <h3>Modernes UI</h3>
-        <p>Dunkles Design mit Live-Countdown, Fortschrittsbalken und farbkodierten Status-Anzeigen.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h4>Loslegen</h4>
+        <p>Soup Macro startet automatisch nach der Installation — Modus wählen, Werte anpassen, Hotkey drücken.</p>
       </div>
     </div>
   </div>
 
-  <!-- Hotkeys -->
-  <div class="section" style="padding-top: 0;">
-    <h2>Hotkeys</h2>
-    <div class="hotkeys">
-      <div class="hotkey">
-        <div class="key green">F1</div>
-        <p>Spam an/aus</p>
-      </div>
-      <div class="hotkey">
-        <div class="key blue">F2</div>
-        <p>Tame an/aus</p>
-      </div>
-      <div class="hotkey">
-        <div class="key purple">F3</div>
-        <p>Makro an/aus</p>
-      </div>
-      <div class="hotkey">
-        <div class="key red">F12</div>
-        <p>Alles stoppen</p>
-      </div>
-    </div>
+  <div class="notice reveal">
+    <span class="notice-icon">⚠️</span>
+    <span>
+      <strong>SmartScreen-Warnung:</strong>
+      Das Programm ist Open Source und kostenlos. Da es kein teures Code-Signing-Zertifikat hat,
+      zeigt Windows eine Warnung. Klicke auf <strong>„Weitere Informationen"</strong> und dann
+      <strong>„Trotzdem ausführen"</strong>.
+    </span>
   </div>
+</section>
 
-  <!-- Install -->
-  <div class="section" style="padding-top: 0;">
-    <h2>Installation</h2>
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">1</div>
-        <p>SoupMacro.exe herunterladen
-          <span>Klicke oben auf den Download-Button</span>
-        </p>
-      </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <p>Als Administrator starten
-          <span>Windows fragt automatisch nach — einfach bestätigen</span>
-        </p>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <p>Loslegen
-          <span>Modus wählen, Werte anpassen, starten</span>
-        </p>
-      </div>
-    </div>
+<!-- CTA -->
+<section class="cta">
+  <div class="reveal">
+    <img src="https://raw.githubusercontent.com/FunkelVult/soup-macro/main/logo.png"
+         style="width:64px;image-rendering:pixelated;margin-bottom:24px;
+                filter:drop-shadow(0 0 30px rgba(192,132,252,.5))"
+         alt="Logo">
+    <h2>Bereit loszulegen?</h2>
+    <p>Kostenlos, kein Python, kein Abo — einfach herunterladen.</p>
+    <a class="btn-dl"
+       href="https://github.com/FunkelVult/soup-macro/releases/latest/download/SoupMacro_Setup.exe"
+       style="display:inline-flex">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M12 5v10M7 15l5 5 5-5M3 19h18"/>
+      </svg>
+      Download — SoupMacro_Setup.exe
+    </a>
   </div>
+</section>
 
-  <!-- Footer -->
-  <footer>
-    <p>Soup Macro · <a href="https://github.com/FunkelVult/soup-macro" target="_blank">GitHub</a> · Made by FunkelVult</p>
-  </footer>
+<!-- Footer -->
+<footer>
+  <p>
+    Soup Macro &nbsp;·&nbsp;
+    <a href="https://github.com/FunkelVult/soup-macro" target="_blank">GitHub</a>
+    &nbsp;·&nbsp;
+    Made with 🍜 by FunkelVult
+  </p>
+</footer>
 
+<script>
+  /* ── Scroll reveal ──────────────────────────────────────── */
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add("visible");
+        // Count-up for stat numbers
+        e.target.querySelectorAll("[data-count]").forEach(el => {
+          const target = +el.dataset.count;
+          const suffix = el.dataset.suffix || "";
+          let start = 0;
+          const dur = 1200;
+          const step = 16;
+          const inc = target / (dur / step);
+          const timer = setInterval(() => {
+            start = Math.min(start + inc, target);
+            el.textContent = Math.round(start) + suffix;
+            if (start >= target) clearInterval(timer);
+          }, step);
+        });
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll(
+    ".reveal, .reveal-left, .stagger, .stat"
+  ).forEach(el => observer.observe(el));
+
+  /* ── Smooth nav highlight ───────────────────────────────── */
+  const sections = document.querySelectorAll("section[id]");
+  const navLinks = document.querySelectorAll(".nav-links a[href^='#']");
+  window.addEventListener("scroll", () => {
+    let current = "";
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 120) current = s.id;
+    });
+    navLinks.forEach(a => {
+      a.style.color = a.getAttribute("href") === "#" + current
+        ? "var(--text)" : "";
+    });
+  });
+
+  /* ── Mockup tab animation ───────────────────────────────── */
+  const mockupTabs = document.querySelectorAll(".mockup-tab");
+  let tabIdx = 0;
+  setInterval(() => {
+    mockupTabs.forEach(t => t.classList.remove("active"));
+    tabIdx = (tabIdx + 1) % mockupTabs.length;
+    mockupTabs[tabIdx].classList.add("active");
+  }, 2000);
+</script>
 </body>
 </html>
