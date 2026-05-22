@@ -5,7 +5,7 @@ from PIL import Image, ImageTk
 from pynput.keyboard import Key, Controller as KbCtrl, Listener as KbListener
 from pynput.mouse import Button, Controller as MsCtrl, Listener as MsListener
 
-VERSION     = "1.2"
+VERSION     = "1.3"
 GITHUB_USER = "FunkelVult"
 GITHUB_REPO = "soup-macro"
 VERSION_URL = f"https://raw.githubusercontent.com/{GITHUB_USER}/{GITHUB_REPO}/main/version.txt"
