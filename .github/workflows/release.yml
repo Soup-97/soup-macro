@@ -1,0 +1,91 @@
+name: Build & Release
+
+# Runs automatically when you push a tag like "v1.4"
+# Also runnable manually via GitHub → Actions → Run workflow
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      id-token: write   # required by SignPath
+      contents: write   # required to create releases
+
+    steps:
+      # ── 1. Checkout ───────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Python ─────────────────────────────────────────────
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: pip install pynput pyinstaller pillow pystray
+
+      # ── 3. Icon ───────────────────────────────────────────────
+      - name: Build icon (logo.png → logo.ico)
+        run: python make_icon.py
+
+      # ── 4. PyInstaller ────────────────────────────────────────
+      - name: Build SoupMacro.exe (PyInstaller)
+        run: |
+          pyinstaller --onefile --windowed `
+            --name "SoupMacro" `
+            --icon=logo.ico `
+            --add-data "logo.png;." `
+            --uac-admin `
+            macro_tool.py
+
+      # ── 5. Inno Setup ─────────────────────────────────────────
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress -y
+
+      - name: Build installer (Inno Setup)
+        run: iscc setup.iss
+
+      # ── 6. Upload unsigned installer as workflow artifact ─────
+      #    SignPath needs the artifact ID to download & sign it
+      - name: Upload unsigned installer
+        id: upload-unsigned
+        uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-installer
+          path: Output/SoupMacro_Setup.exe
+
+      # ── 7. Sign with SignPath ─────────────────────────────────
+      #    Requires repository secrets:
+      #      SIGNPATH_API_TOKEN  → Settings → Secrets → Actions
+      #      SIGNPATH_ORG_ID     → your SignPath organization ID
+      #
+      #    And in the SignPath dashboard:
+      #      Project slug:         soup-macro
+      #      Signing policy slug:  release-signing
+      #      Artifact config slug: default
+      - name: Sign installer (SignPath Foundation)
+        id: sign
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token:               ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id:         ${{ secrets.SIGNPATH_ORG_ID }}
+          project-slug:            'soup-macro'
+          signing-policy-slug:     'release-signing'
+          artifact-configuration-slug: 'default'
+          github-artifact-id:      ${{ steps.upload-unsigned.outputs.artifact-id }}
+          wait-for-completion:     true
+          output-artifact-directory: signed
+
+      # ── 8. Create GitHub Release ──────────────────────────────
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            signed/SoupMacro_Setup.exe
+            dist/SoupMacro.exe
