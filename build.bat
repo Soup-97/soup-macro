@@ -13,7 +13,10 @@ python make_icon.py
 echo.
 
 echo [3/5] Erstelle .exe mit PyInstaller (1-2 Minuten)...
-pyinstaller --onefile --windowed ^
+if exist build  rmdir /s /q build
+if exist dist   rmdir /s /q dist
+if exist SoupMacro.spec del SoupMacro.spec
+pyinstaller --clean --onefile --windowed ^
   --name "SoupMacro" ^
   --icon=logo.ico ^
   --add-data "logo.png;." ^

@@ -142,41 +142,65 @@ class SBtn(tk.Canvas):
 
 
 class TabBar(tk.Frame):
+    """Tab bar using plain Frame+Label — no Canvas, fully compatible."""
     def __init__(self, parent, tabs, callback, bg=BG):
         super().__init__(parent, bg=bg)
-        self._active=0; self._cb=callback; self._cvs=[]; self._data=tabs; self._hov=-1
-        cont = tk.Frame(self, bg=CARD2, highlightbackground=BORDER2, highlightthickness=1)
+        self._active = 0
+        self._cb     = callback
+        self._data   = tabs
+        self._items  = []   # (outer_frame, label, indicator)
+
+        cont = tk.Frame(self, bg=CARD2,
+                        highlightbackground=BORDER2, highlightthickness=1)
         cont.pack(fill="x", padx=12)
-        for i,(icon,label,color) in enumerate(tabs):
-            cv = tk.Canvas(cont, height=46, highlightthickness=0, bg=CARD2, cursor="hand2")
-            cv.pack(side="left", fill="both", expand=True)
-            cv.bind("<Configure>", lambda e,i=i: self._draw(i))
-            cv.bind("<Button-1>",  lambda e,i=i: self._click(i))
-            cv.bind("<Enter>",     lambda e,i=i: self._hover(i,True))
-            cv.bind("<Leave>",     lambda e,i=i: self._hover(i,False))
-            self._cvs.append(cv)
-        self._redraw()
 
-    def select(self,idx): self._active=idx; self._redraw()
-    def _click(self,idx): self.select(idx); self._cb(idx)
-    def _hover(self,idx,h): self._hov=idx if h else -1; self._draw(idx)
-    def _redraw(self):
-        for i in range(len(self._cvs)): self._draw(i)
+        for i, (icon, label, color) in enumerate(tabs):
+            col = CARD if i == 0 else CARD2
+            outer = tk.Frame(cont, bg=col, cursor="hand2")
+            outer.pack(side="left", fill="both", expand=True)
 
-    def _draw(self,idx):
-        cv=self._cvs[idx]; cv.delete("all")
-        w,h=cv.winfo_width(),cv.winfo_height()
-        if w<2: return
-        icon,label,color=self._data[idx]
-        active=idx==self._active; hover=self._hov==idx
-        if hover and not active:
-            cv.create_rectangle(0,0,w,h,fill=CARD,outline="")
-        if active:
-            rrect(cv,6,h-5,w-6,h,3,fill=color,outline="")
-            fg=TEXT; font=("Segoe UI",9,"bold")
-        else:
-            fg=MUTED2; font=("Segoe UI",9)
-        cv.create_text(w//2,h//2-2,text=f"{icon}  {label}",fill=fg,font=font)
+            lbl = tk.Label(outer,
+                           text=f"{icon}  {label}",
+                           font=("Segoe UI", 9, "bold") if i == 0 else ("Segoe UI", 9),
+                           fg=TEXT if i == 0 else MUTED2,
+                           bg=col, pady=10, cursor="hand2")
+            lbl.pack(fill="both", expand=True)
+
+            ind = tk.Frame(outer, height=3, bg=color if i == 0 else CARD2)
+            ind.pack(fill="x", padx=6)
+
+            for w in (outer, lbl):
+                w.bind("<Button-1>", lambda e, idx=i: self._click(idx))
+                w.bind("<Enter>",    lambda e, idx=i: self._hover(idx, True))
+                w.bind("<Leave>",    lambda e, idx=i: self._hover(idx, False))
+
+            self._items.append((outer, lbl, ind))
+
+    def select(self, idx):
+        self._active = idx
+        self._refresh()
+
+    def _click(self, idx):
+        self.select(idx)
+        self._cb(idx)
+
+    def _hover(self, idx, on):
+        if idx == self._active: return
+        outer, lbl, _ = self._items[idx]
+        c = CARD if on else CARD2
+        outer.config(bg=c); lbl.config(bg=c)
+
+    def _refresh(self):
+        for i, (outer, lbl, ind) in enumerate(self._items):
+            _, _, color = self._data[i]
+            if i == self._active:
+                outer.config(bg=CARD); lbl.config(bg=CARD, fg=TEXT,
+                    font=("Segoe UI", 9, "bold"))
+                ind.config(bg=color)
+            else:
+                outer.config(bg=CARD2); lbl.config(bg=CARD2, fg=MUTED2,
+                    font=("Segoe UI", 9))
+                ind.config(bg=CARD2)
 
 
 class StatusRow(tk.Frame):
@@ -205,7 +229,7 @@ class Divider(tk.Frame):
 S = {
 "de": dict(
     tab_spam="SPAM", tab_tame="TAME", tab_macro="MAKROS",
-    tab_rec="AUFNAHME", tab_set="EINSTELLUNGEN",
+    tab_rec="AUFNAHME", tab_set="CONFIG",
     card_spam="SPAM MODUS", card_tame="TAME MODUS",
     card_macro="EIGENER MAKRO", card_rec="AUFNAHME",
     card_lang="SPRACHE", card_hotkeys="TASTENKÜRZEL",
