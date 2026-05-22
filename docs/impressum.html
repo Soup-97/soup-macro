@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soup Macro — Impressum</title>
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --bg:#070712; --card:#0e0e20; --border:#1a1a35; --border2:#252548;
+      --green:#34d399; --blue:#818cf8; --purple:#c084fc; --red:#f87171;
+      --orange:#fb923c; --amber:#fbbf24; --text:#eef2ff; --muted:#4a5280; --muted2:#6b7aaa;
+    }
+    html { scroll-behavior:smooth; }
+    body { background:var(--bg); color:var(--text); font-family:"Segoe UI",system-ui,sans-serif; overflow-x:hidden; }
+
+    body::before {
+      content:""; position:fixed; inset:0;
+      background: radial-gradient(ellipse 70% 50% at 15% -5%, #c084fc12 0%, transparent 60%),
+                  radial-gradient(ellipse 50% 40% at 85% 100%, #818cf812 0%, transparent 60%);
+      pointer-events:none; z-index:0;
+    }
+
+    nav {
+      position:sticky; top:0; z-index:100;
+      display:flex; align-items:center; gap:12px; padding:16px 48px;
+      background:rgba(7,7,18,.8); backdrop-filter:blur(20px);
+      border-bottom:1px solid var(--border);
+    }
+    .nav-logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
+    .nav-logo img { width:28px; image-rendering:pixelated; }
+    .nav-logo span { font-size:16px; font-weight:700; color:var(--text); }
+    .nav-links { display:flex; gap:28px; margin-left:auto; }
+    .nav-links a { color:var(--muted2); text-decoration:none; font-size:14px; transition:color .2s; }
+    .nav-links a:hover { color:var(--text); }
+    .back-btn {
+      display:inline-flex; align-items:center; gap:8px;
+      background:rgba(255,255,255,.06); border:1px solid var(--border2);
+      color:var(--muted2); font-size:13px; font-weight:600;
+      padding:7px 16px; border-radius:8px; text-decoration:none;
+      transition:background .2s, color .2s; flex-shrink:0;
+    }
+    .back-btn:hover { background:rgba(255,255,255,.1); color:var(--text); }
+
+    .page { position:relative; z-index:1; max-width:720px; margin:0 auto; padding:72px 24px 100px; }
+    .page-eyebrow { font-size:12px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--purple); margin-bottom:12px; }
+    .page-title { font-size:clamp(32px,5vw,52px); font-weight:900; line-height:1.1; margin-bottom:12px;
+      background:linear-gradient(135deg,#eef2ff 0%,var(--purple) 60%,var(--blue) 100%);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+
+    /* Legal notice banner */
+    .law-note {
+      background:rgba(129,140,248,.08); border:1px solid rgba(129,140,248,.25);
+      border-radius:12px; padding:14px 18px; margin-bottom:40px;
+      font-size:13px; color:var(--muted2); line-height:1.6;
+      display:flex; gap:10px; align-items:flex-start;
+    }
+    .law-note-icon { flex-shrink:0; font-size:16px; }
+
+    /* Section cards */
+    .imp-section {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:16px; padding:28px; margin-bottom:16px;
+      transition:border-color .2s;
+    }
+    .imp-section:hover { border-color:var(--border2); }
+    .imp-section h2 {
+      font-size:16px; font-weight:700; color:var(--text);
+      margin-bottom:16px; padding-bottom:12px;
+      border-bottom:1px solid var(--border);
+      display:flex; align-items:center; gap:10px;
+    }
+    .imp-section h2 .sec-icon { font-size:18px; }
+    .imp-section p { font-size:14px; color:var(--muted2); line-height:1.8; margin-bottom:10px; }
+    .imp-section p:last-child { margin-bottom:0; }
+    .imp-section a { color:var(--blue); text-decoration:none; }
+    .imp-section a:hover { text-decoration:underline; }
+    .placeholder {
+      display:inline-block; background:rgba(251,191,36,.1); border:1px dashed rgba(251,191,36,.4);
+      color:var(--amber); font-size:12px; font-weight:600;
+      padding:1px 8px; border-radius:4px; font-family:monospace;
+    }
+    .info-row { display:flex; gap:8px; margin-bottom:8px; font-size:14px; }
+    .info-label { color:var(--muted2); min-width:120px; flex-shrink:0; }
+    .info-value { color:var(--text); }
+
+    /* Edit hint */
+    .edit-hint {
+      background:rgba(251,191,36,.06); border:1px solid rgba(251,191,36,.2);
+      border-radius:10px; padding:12px 16px; margin-top:24px;
+      font-size:12px; color:var(--amber); line-height:1.6;
+    }
+    .edit-hint code { background:rgba(251,191,36,.1); padding:1px 5px; border-radius:3px; font-family:monospace; }
+
+    footer {
+      position:relative; z-index:1; border-top:1px solid var(--border);
+      text-align:center; padding:32px 20px; font-size:13px; color:var(--muted);
+    }
+    footer a { color:var(--blue); text-decoration:none; transition:color .2s; }
+    footer a:hover { color:var(--text); }
+
+    @keyframes fadeDown { from{opacity:0;transform:translateY(-16px)} to{opacity:1;transform:translateY(0)} }
+    .ani { animation:fadeDown .6s ease both; }
+
+    @media(max-width:640px) { nav{padding:14px 20px} .nav-links{display:none} }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">
+    <img src="https://raw.githubusercontent.com/FunkelVult/soup-macro/main/logo.png" alt="Logo">
+    <span>Soup Macro</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html#features">Features</a>
+    <a href="changelog.html">Changelog</a>
+    <a href="impressum.html" style="color:var(--text)">Impressum</a>
+    <a href="datenschutz.html">Datenschutz</a>
+    <a href="https://github.com/FunkelVult/soup-macro" target="_blank">GitHub</a>
+  </div>
+  <a class="back-btn" href="index.html" style="margin-left:auto">
+    ← Zurück / Back
+  </a>
+</nav>
+
+<div class="page">
+  <div class="ani">
+    <div class="page-eyebrow">Rechtliches · Legal</div>
+    <h1 class="page-title">Impressum</h1>
+  </div>
+
+  <div class="law-note ani" style="animation-delay:.1s">
+    <span class="law-note-icon">⚖️</span>
+    <span>
+      Diese Seite ist gemäß § 5 TMG (Telemediengesetz) erforderlich und nur auf Deutsch verfügbar.<br>
+      <em>This page is legally required under German law (§ 5 TMG) and is only available in German.</em>
+    </span>
+  </div>
+
+  <!-- Angaben gemäß § 5 TMG -->
+  <div class="imp-section ani" style="animation-delay:.15s">
+    <h2><span class="sec-icon">👤</span> Angaben gemäß § 5 TMG</h2>
+    <div class="info-row">
+      <span class="info-label">Name:</span>
+      <span class="info-value"><span class="placeholder">[DEIN VOLLSTÄNDIGER NAME]</span></span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Straße:</span>
+      <span class="info-value"><span class="placeholder">[STRASSE UND HAUSNUMMER]</span></span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">PLZ / Ort:</span>
+      <span class="info-value"><span class="placeholder">[PLZ ORT]</span></span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Land:</span>
+      <span class="info-value">Deutschland</span>
+    </div>
+    <div class="edit-hint">
+      ⚠️ <strong>Aktion erforderlich:</strong> Ersetze die gelben Platzhalter durch deine echten Angaben in der Datei
+      <code>docs/impressum.html</code>. Ohne vollständige Angaben ist das Impressum nicht rechtskonform.
+    </div>
+  </div>
+
+  <!-- Kontakt -->
+  <div class="imp-section ani" style="animation-delay:.2s">
+    <h2><span class="sec-icon">📬</span> Kontakt</h2>
+    <div class="info-row">
+      <span class="info-label">E-Mail:</span>
+      <span class="info-value"><span class="placeholder">[DEINE@EMAIL.DE]</span></span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">GitHub:</span>
+      <span class="info-value"><a href="https://github.com/FunkelVult" target="_blank">github.com/FunkelVult</a></span>
+    </div>
+    <p style="margin-top:12px">
+      Anfragen per E-Mail werden so schnell wie möglich beantwortet.
+    </p>
+  </div>
+
+  <!-- Haftung für Inhalte -->
+  <div class="imp-section ani" style="animation-delay:.25s">
+    <h2><span class="sec-icon">📄</span> Haftung für Inhalte</h2>
+    <p>
+      Als Diensteanbieter bin ich gemäß § 7 Abs. 1 TMG für eigene Inhalte auf diesen Seiten nach
+      den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG bin ich als Diensteanbieter
+      jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen
+      oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen.
+    </p>
+    <p>
+      Verpflichtungen zur Entfernung oder Sperrung der Nutzung von Informationen nach den
+      allgemeinen Gesetzen bleiben hiervon unberührt. Eine diesbezügliche Haftung ist jedoch erst ab
+      dem Zeitpunkt der Kenntnis einer konkreten Rechtsverletzung möglich. Bei Bekanntwerden von
+      entsprechenden Rechtsverletzungen werde ich diese Inhalte umgehend entfernen.
+    </p>
+  </div>
+
+  <!-- Haftung für Links -->
+  <div class="imp-section ani" style="animation-delay:.3s">
+    <h2><span class="sec-icon">🔗</span> Haftung für Links</h2>
+    <p>
+      Mein Angebot enthält Links zu externen Websites Dritter, auf deren Inhalte ich keinen Einfluss
+      habe. Deshalb kann ich für diese fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte
+      der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich.
+    </p>
+    <p>
+      Die verlinkten Seiten wurden zum Zeitpunkt der Verlinkung auf mögliche Rechtsverstöße
+      überprüft. Rechtswidrige Inhalte waren zum Zeitpunkt der Verlinkung nicht erkennbar. Eine
+      permanente inhaltliche Kontrolle der verlinkten Seiten ist jedoch ohne konkrete Anhaltspunkte
+      einer Rechtsverletzung nicht zumutbar. Bei Bekanntwerden von Rechtsverletzungen werde ich
+      derartige Links umgehend entfernen.
+    </p>
+  </div>
+
+  <!-- Urheberrecht -->
+  <div class="imp-section ani" style="animation-delay:.35s">
+    <h2><span class="sec-icon">©️</span> Urheberrecht</h2>
+    <p>
+      Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem
+      deutschen Urheberrecht. Der Quellcode von Soup Macro ist unter der
+      <a href="https://github.com/FunkelVult/soup-macro/blob/main/LICENSE" target="_blank">MIT-Lizenz</a>
+      veröffentlicht und darf entsprechend dieser Lizenz verwendet und verbreitet werden.
+    </p>
+    <p>
+      Soweit die Inhalte auf dieser Seite nicht vom Betreiber erstellt wurden, werden die
+      Urheberrechte Dritter beachtet. Insbesondere werden Inhalte Dritter als solche
+      gekennzeichnet. Solltest du trotzdem auf eine Urheberrechtsverletzung aufmerksam werden,
+      bitte ich um einen entsprechenden Hinweis. Bei Bekanntwerden von Rechtsverletzungen werde
+      ich derartige Inhalte umgehend entfernen.
+    </p>
+  </div>
+</div>
+
+<footer>
+  <p>
+    Soup Macro &nbsp;·&nbsp;
+    <a href="index.html">Home</a> &nbsp;·&nbsp;
+    <a href="changelog.html">Changelog</a> &nbsp;·&nbsp;
+    <a href="impressum.html">Impressum</a> &nbsp;·&nbsp;
+    <a href="datenschutz.html">Datenschutz</a> &nbsp;·&nbsp;
+    <a href="https://github.com/FunkelVult/soup-macro" target="_blank">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

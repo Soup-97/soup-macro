@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soup Macro — Datenschutzerklärung</title>
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --bg:#070712; --card:#0e0e20; --border:#1a1a35; --border2:#252548;
+      --green:#34d399; --blue:#818cf8; --purple:#c084fc; --red:#f87171;
+      --orange:#fb923c; --amber:#fbbf24; --text:#eef2ff; --muted:#4a5280; --muted2:#6b7aaa;
+    }
+    html { scroll-behavior:smooth; }
+    body { background:var(--bg); color:var(--text); font-family:"Segoe UI",system-ui,sans-serif; overflow-x:hidden; }
+
+    body::before {
+      content:""; position:fixed; inset:0;
+      background: radial-gradient(ellipse 70% 50% at 15% -5%, #818cf812 0%, transparent 60%),
+                  radial-gradient(ellipse 50% 40% at 85% 100%, #c084fc12 0%, transparent 60%);
+      pointer-events:none; z-index:0;
+    }
+
+    nav {
+      position:sticky; top:0; z-index:100;
+      display:flex; align-items:center; gap:12px; padding:16px 48px;
+      background:rgba(7,7,18,.8); backdrop-filter:blur(20px);
+      border-bottom:1px solid var(--border);
+    }
+    .nav-logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
+    .nav-logo img { width:28px; image-rendering:pixelated; }
+    .nav-logo span { font-size:16px; font-weight:700; color:var(--text); }
+    .nav-links { display:flex; gap:28px; margin-left:auto; }
+    .nav-links a { color:var(--muted2); text-decoration:none; font-size:14px; transition:color .2s; }
+    .nav-links a:hover { color:var(--text); }
+    .back-btn {
+      display:inline-flex; align-items:center; gap:8px;
+      background:rgba(255,255,255,.06); border:1px solid var(--border2);
+      color:var(--muted2); font-size:13px; font-weight:600;
+      padding:7px 16px; border-radius:8px; text-decoration:none;
+      transition:background .2s, color .2s; flex-shrink:0;
+    }
+    .back-btn:hover { background:rgba(255,255,255,.1); color:var(--text); }
+
+    .page { position:relative; z-index:1; max-width:720px; margin:0 auto; padding:72px 24px 100px; }
+    .page-eyebrow { font-size:12px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--blue); margin-bottom:12px; }
+    .page-title { font-size:clamp(28px,5vw,48px); font-weight:900; line-height:1.1; margin-bottom:12px;
+      background:linear-gradient(135deg,#eef2ff 0%,var(--blue) 60%,var(--purple) 100%);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+
+    .law-note {
+      background:rgba(129,140,248,.08); border:1px solid rgba(129,140,248,.25);
+      border-radius:12px; padding:14px 18px; margin-bottom:40px;
+      font-size:13px; color:var(--muted2); line-height:1.6;
+      display:flex; gap:10px; align-items:flex-start;
+    }
+    .law-note-icon { flex-shrink:0; font-size:16px; }
+
+    /* Summary chips */
+    .summary-chips {
+      display:flex; flex-wrap:wrap; gap:10px; margin-bottom:40px;
+    }
+    .chip {
+      display:inline-flex; align-items:center; gap:8px;
+      background:var(--card); border:1px solid var(--border);
+      border-radius:10px; padding:10px 16px; font-size:13px;
+    }
+    .chip-icon { font-size:16px; }
+    .chip-text { color:var(--muted2); }
+    .chip-text strong { color:var(--text); display:block; font-size:12px; font-weight:700; }
+
+    /* Section cards */
+    .ds-section {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:16px; padding:28px; margin-bottom:16px;
+      transition:border-color .2s;
+    }
+    .ds-section:hover { border-color:var(--border2); }
+    .ds-section h2 {
+      font-size:16px; font-weight:700; color:var(--text);
+      margin-bottom:16px; padding-bottom:12px;
+      border-bottom:1px solid var(--border);
+      display:flex; align-items:center; gap:10px;
+    }
+    .ds-section h2 .sec-icon { font-size:18px; }
+    .ds-section h3 { font-size:14px; font-weight:700; color:var(--text); margin:16px 0 8px; }
+    .ds-section p { font-size:14px; color:var(--muted2); line-height:1.8; margin-bottom:10px; }
+    .ds-section p:last-child { margin-bottom:0; }
+    .ds-section a { color:var(--blue); text-decoration:none; }
+    .ds-section a:hover { text-decoration:underline; }
+    .ds-section ul { margin:8px 0 12px 20px; }
+    .ds-section ul li { font-size:14px; color:var(--muted2); line-height:1.8; margin-bottom:4px; }
+
+    /* Highlight box */
+    .highlight-box {
+      background:rgba(52,211,153,.06); border:1px solid rgba(52,211,153,.2);
+      border-radius:10px; padding:14px 16px; margin:12px 0;
+      font-size:13px; color:var(--muted2); line-height:1.6;
+    }
+    .highlight-box strong { color:var(--green); }
+
+    footer {
+      position:relative; z-index:1; border-top:1px solid var(--border);
+      text-align:center; padding:32px 20px; font-size:13px; color:var(--muted);
+    }
+    footer a { color:var(--blue); text-decoration:none; transition:color .2s; }
+    footer a:hover { color:var(--text); }
+
+    @keyframes fadeDown { from{opacity:0;transform:translateY(-16px)} to{opacity:1;transform:translateY(0)} }
+    .ani { animation:fadeDown .6s ease both; }
+
+    @media(max-width:640px) { nav{padding:14px 20px} .nav-links{display:none} }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">
+    <img src="https://raw.githubusercontent.com/FunkelVult/soup-macro/main/logo.png" alt="Logo">
+    <span>Soup Macro</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html#features">Features</a>
+    <a href="changelog.html">Changelog</a>
+    <a href="impressum.html">Impressum</a>
+    <a href="datenschutz.html" style="color:var(--text)">Datenschutz</a>
+    <a href="https://github.com/FunkelVult/soup-macro" target="_blank">GitHub</a>
+  </div>
+  <a class="back-btn" href="index.html" style="margin-left:auto">
+    ← Zurück / Back
+  </a>
+</nav>
+
+<div class="page">
+  <div class="ani">
+    <div class="page-eyebrow">Datenschutz · Privacy</div>
+    <h1 class="page-title">Datenschutzerklärung</h1>
+  </div>
+
+  <div class="law-note ani" style="animation-delay:.1s">
+    <span class="law-note-icon">🔒</span>
+    <span>
+      Diese Seite ist gemäß DSGVO (Datenschutz-Grundverordnung) erforderlich und nur auf Deutsch verfügbar.<br>
+      <em>This page is legally required under GDPR and is only available in German.</em>
+      &nbsp;— <strong style="color:var(--text)">Short version:</strong> This site uses no cookies, no trackers, no analytics.
+    </span>
+  </div>
+
+  <!-- Summary chips -->
+  <div class="summary-chips ani" style="animation-delay:.12s">
+    <div class="chip">
+      <span class="chip-icon">🍪</span>
+      <span class="chip-text"><strong>Keine Cookies</strong>Keine Tracking-Cookies gesetzt</span>
+    </div>
+    <div class="chip">
+      <span class="chip-icon">📊</span>
+      <span class="chip-text"><strong>Kein Analytics</strong>Keine Nutzungsverfolgung</span>
+    </div>
+    <div class="chip">
+      <span class="chip-icon">🚫</span>
+      <span class="chip-text"><strong>Kein Tracking</strong>Keine Drittanbieter-Tracker</span>
+    </div>
+    <div class="chip">
+      <span class="chip-icon">💾</span>
+      <span class="chip-text"><strong>localStorage</strong>Nur Sprachpräferenz lokal</span>
+    </div>
+  </div>
+
+  <!-- 1. Verantwortlicher -->
+  <div class="ds-section ani" style="animation-delay:.15s">
+    <h2><span class="sec-icon">👤</span> 1. Verantwortlicher</h2>
+    <p>
+      Verantwortlicher im Sinne der Datenschutz-Grundverordnung (DSGVO) und anderer nationaler
+      Datenschutzgesetze sowie sonstiger datenschutzrechtlicher Bestimmungen ist:
+    </p>
+    <p>
+      Die Kontaktdaten des Verantwortlichen sind im
+      <a href="impressum.html">Impressum</a> aufgeführt.
+    </p>
+  </div>
+
+  <!-- 2. GitHub Pages -->
+  <div class="ds-section ani" style="animation-delay:.2s">
+    <h2><span class="sec-icon">🖥️</span> 2. Hosting durch GitHub Pages</h2>
+    <p>
+      Diese Website wird über <strong style="color:var(--text)">GitHub Pages</strong> (GitHub, Inc.,
+      88 Colin P Kelly Jr St, San Francisco, CA 94107, USA) gehostet. Beim Abruf dieser Seite
+      verarbeitet GitHub automatisch folgende Daten:
+    </p>
+    <ul>
+      <li>IP-Adresse des anfragenden Geräts</li>
+      <li>Datum und Uhrzeit des Zugriffs</li>
+      <li>Name und URL der abgerufenen Datei</li>
+      <li>Übertragene Datenmenge</li>
+      <li>Zugriffsstatus (HTTP-Statuscode)</li>
+      <li>Browser und Betriebssystem des anfragenden Geräts</li>
+      <li>Referrer-URL (zuvor besuchte Seite)</li>
+    </ul>
+    <p>
+      Diese Daten werden von GitHub gemäß deren
+      <a href="https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement" target="_blank" rel="noopener">
+        Datenschutzerklärung
+      </a> verarbeitet.
+      GitHub kann Daten in die USA übertragen. GitHub ist im EU-US Data Privacy Framework zertifiziert.
+    </p>
+    <div class="highlight-box">
+      <strong>Hinweis:</strong> Ich als Betreiber dieser Seite habe keinen Einfluss auf die von
+      GitHub im Rahmen des Hostings erhobenen Daten und keinen Zugriff darauf.
+    </div>
+  </div>
+
+  <!-- 3. LocalStorage -->
+  <div class="ds-section ani" style="animation-delay:.25s">
+    <h2><span class="sec-icon">💾</span> 3. Lokaler Speicher (localStorage)</h2>
+    <p>
+      Diese Website speichert genau <strong style="color:var(--text)">einen Eintrag</strong> im
+      lokalen Speicher (localStorage) deines Browsers:
+    </p>
+    <div class="highlight-box">
+      <strong>soup-macro-lang</strong> — Sprachpräferenz (<code>en</code> oder <code>de</code>),
+      die du über den Schalter in der Navigation gesetzt hast. Dieser Wert verbleibt ausschließlich
+      auf deinem Gerät und wird niemals an einen Server übertragen.
+    </div>
+    <p>
+      Du kannst diesen Eintrag jederzeit über die Entwickler-Konsole deines Browsers löschen:
+      <code style="background:rgba(255,255,255,.05);padding:1px 6px;border-radius:4px;font-family:monospace;font-size:12px">
+        localStorage.removeItem('soup-macro-lang')
+      </code>
+    </p>
+    <p>
+      Es werden <strong style="color:var(--text)">keine Cookies</strong> gesetzt.
+    </p>
+  </div>
+
+  <!-- 4. Externe Links -->
+  <div class="ds-section ani" style="animation-delay:.3s">
+    <h2><span class="sec-icon">🔗</span> 4. Externe Links</h2>
+    <p>Diese Website enthält Links zu folgenden externen Diensten:</p>
+    <h3>GitHub</h3>
+    <p>
+      Links zu <a href="https://github.com/FunkelVult/soup-macro" target="_blank" rel="noopener">github.com</a>.
+      GitHub verarbeitet beim Abruf entsprechend seiner
+      <a href="https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement" target="_blank" rel="noopener">
+        Datenschutzerklärung
+      </a> Daten.
+    </p>
+    <h3>VirusTotal</h3>
+    <p>
+      Der Link zu
+      <a href="https://www.virustotal.com" target="_blank" rel="noopener">virustotal.com</a>
+      (Google LLC, 1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA) öffnet einen Scanbericht.
+      VirusTotal verarbeitet beim Abruf entsprechend seiner
+      <a href="https://support.virustotal.com/hc/en-us/articles/115002168385-Privacy-Policy" target="_blank" rel="noopener">
+        Datenschutzerklärung
+      </a> Daten.
+    </p>
+    <p>
+      Für die Datenverarbeitung dieser externen Anbieter übernehme ich keine Verantwortung.
+    </p>
+  </div>
+
+  <!-- 5. App Datenschutz -->
+  <div class="ds-section ani" style="animation-delay:.32s">
+    <h2><span class="sec-icon">🖥️</span> 5. Datenschutz bei der App (SoupMacro.exe)</h2>
+    <p>
+      Die herunterladbare Applikation <strong style="color:var(--text)">Soup Macro</strong>
+      kommuniziert ausschließlich mit der GitHub Releases API um nach Updates zu suchen:
+    </p>
+    <ul>
+      <li>URL: <code style="font-size:12px;font-family:monospace">https://api.github.com/repos/FunkelVult/soup-macro/releases/latest</code></li>
+      <li>Übertragen wird: eine Standard-HTTP-GET-Anfrage (IP-Adresse, User-Agent)</li>
+      <li>Zweck: Ermittlung der aktuell verfügbaren Version</li>
+      <li>Häufigkeit: einmalig beim Start der App</li>
+    </ul>
+    <p>
+      Die App protokolliert keine Tastatureingaben nach außen, sendet keine Makros oder Nutzungsdaten
+      und kommuniziert mit keinem weiteren Server. Konfigurationsdaten werden ausschließlich lokal
+      unter <code style="font-size:12px;font-family:monospace">%APPDATA%\SoupMacro\config.json</code>
+      auf dem eigenen Rechner gespeichert.
+    </p>
+    <div class="highlight-box">
+      <strong>Open Source:</strong> Der vollständige Quellcode ist auf
+      <a href="https://github.com/FunkelVult/soup-macro" target="_blank" rel="noopener">GitHub</a>
+      einsehbar und überprüfbar.
+    </div>
+  </div>
+
+  <!-- 6. Rechte -->
+  <div class="ds-section ani" style="animation-delay:.35s">
+    <h2><span class="sec-icon">⚖️</span> 6. Deine Rechte</h2>
+    <p>Du hast gemäß DSGVO folgende Rechte:</p>
+    <ul>
+      <li><strong style="color:var(--text)">Auskunft</strong> (Art. 15 DSGVO) — Welche Daten werden verarbeitet?</li>
+      <li><strong style="color:var(--text)">Berichtigung</strong> (Art. 16 DSGVO) — Korrektur unrichtiger Daten</li>
+      <li><strong style="color:var(--text)">Löschung</strong> (Art. 17 DSGVO) — „Recht auf Vergessenwerden"</li>
+      <li><strong style="color:var(--text)">Einschränkung</strong> (Art. 18 DSGVO) — Einschränkung der Verarbeitung</li>
+      <li><strong style="color:var(--text)">Widerspruch</strong> (Art. 21 DSGVO) — Widerspruch gegen Verarbeitung</li>
+      <li><strong style="color:var(--text)">Beschwerde</strong> — Bei deiner zuständigen Datenschutzaufsichtsbehörde</li>
+    </ul>
+    <p>
+      Da ich als Betreiber dieser statischen Seite selbst keine personenbezogenen Daten erhebe oder
+      speichere, sind die meisten Rechte gegenüber GitHub (als Hosting-Anbieter) geltend zu machen.
+    </p>
+  </div>
+
+  <!-- 7. Aktualisierung -->
+  <div class="ds-section ani" style="animation-delay:.38s">
+    <h2><span class="sec-icon">📅</span> 7. Aktualität dieser Erklärung</h2>
+    <p>
+      Diese Datenschutzerklärung ist aktuell gültig und hat den Stand <strong style="color:var(--text)">Mai 2026</strong>.
+      Durch die Weiterentwicklung dieser Website oder aufgrund geänderter gesetzlicher oder behördlicher
+      Vorgaben kann es notwendig werden, diese Datenschutzerklärung zu ändern.
+    </p>
+  </div>
+</div>
+
+<footer>
+  <p>
+    Soup Macro &nbsp;·&nbsp;
+    <a href="index.html">Home</a> &nbsp;·&nbsp;
+    <a href="changelog.html">Changelog</a> &nbsp;·&nbsp;
+    <a href="impressum.html">Impressum</a> &nbsp;·&nbsp;
+    <a href="datenschutz.html">Datenschutz</a> &nbsp;·&nbsp;
+    <a href="https://github.com/FunkelVult/soup-macro" target="_blank">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>
