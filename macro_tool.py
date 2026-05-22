@@ -18,7 +18,7 @@ try:
 except ImportError:
     HAS_SOUND = False
 
-VERSION     = "1.4"
+VERSION     = "1.5"
 GITHUB_USER = "FunkelVult"
 GITHUB_REPO = "soup-macro"
 VERSION_URL = f"https://raw.githubusercontent.com/{GITHUB_USER}/{GITHUB_REPO}/main/version.txt"
