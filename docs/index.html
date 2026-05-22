@@ -201,6 +201,17 @@
     .hero-meta span::before {
       content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--muted);
     }
+    .hero-meta-vt {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin: 0 10px;
+      color: var(--green); font-weight: 700;
+      text-decoration: none; font-size: 12px;
+      background: rgba(52,211,153,.1);
+      border: 1px solid rgba(52,211,153,.25);
+      padding: 3px 10px; border-radius: 100px;
+      transition: background .2s, border-color .2s;
+    }
+    .hero-meta-vt:hover { background: rgba(52,211,153,.2); border-color: rgba(52,211,153,.5); }
 
     /* ── Screenshot mockup ───────────────────────────────── */
     .mockup-wrap {
@@ -564,6 +575,15 @@
   <p class="hero-meta">
     <span>Windows 10 / 11</span>
     <span>Kostenlos &amp; Open Source</span>
+    <a class="hero-meta-vt"
+       href="https://www.virustotal.com/gui/url/4cd4a724e55a9600f3a3eeb04ee2d28826960dfb2c43d41e643c88647cb92a84?nocache=1"
+       target="_blank" rel="noopener">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.5">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+      VirusTotal: 0 Funde
+    </a>
   </p>
 
   <!-- App mockup -->
@@ -788,6 +808,11 @@
       Das Programm ist Open Source und kostenlos. Da es kein teures Code-Signing-Zertifikat hat,
       zeigt Windows eine Warnung. Klicke auf <strong>„Weitere Informationen"</strong> und dann
       <strong>„Trotzdem ausführen"</strong>.
+      Die Datei wurde von VirusTotal geprüft und ist sauber —
+      <a href="https://www.virustotal.com/gui/url/4cd4a724e55a9600f3a3eeb04ee2d28826960dfb2c43d41e643c88647cb92a84?nocache=1"
+         target="_blank" rel="noopener" style="color:var(--green);font-weight:700;text-decoration:none">
+        Ergebnis ansehen ↗
+      </a>
     </span>
   </div>
 </section>
