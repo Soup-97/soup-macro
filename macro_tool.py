@@ -7,6 +7,12 @@ from pynput.keyboard import Key, Controller as KbCtrl, Listener as KbListener
 from pynput.mouse import Button, Controller as MsCtrl, Listener as MsListener
 
 try:
+    import winreg
+    HAS_WINREG = True
+except ImportError:
+    HAS_WINREG = False
+
+try:
     import pystray
     HAS_TRAY = True
 except ImportError:
@@ -18,7 +24,7 @@ try:
 except ImportError:
     HAS_SOUND = False
 
-VERSION     = "1.6"
+VERSION     = "1.7"
 GITHUB_USER = "FunkelVult"
 GITHUB_REPO = "soup-macro"
 VERSION_URL = f"https://raw.githubusercontent.com/{GITHUB_USER}/{GITHUB_REPO}/main/version.txt"
@@ -303,6 +309,28 @@ S = {
     tray_show="Öffnen", tray_stop="Alles stoppen", tray_quit="Beenden",
     btn_minimize_tray="In Tray minimieren",
     overlay_tray_hint="Fenster ausblenden — Soup Macro läuft im Hintergrund weiter.",
+    # Overlay row labels
+    ov_spam="Spam", ov_tame="Tame", ov_macro="Makro",
+    ov_rec="Aufnahme", ov_play="Abspielen",
+    # Macro new step types
+    step_type_text="⌨ Text:", step_scroll="🖱 Scroll:",
+    f_text="Text", btn_add_type="+ Text", btn_add_scroll="+ Scroll",
+    scroll_up="↑ Hoch", scroll_down="↓ Runter", f_scroll_amt="Betrag",
+    # Macro startup delay
+    f_macro_delay="Startverzögerung (s)",
+    # Autostart
+    card_autostart="AUTOSTART",
+    autostart_lbl="Mit Windows starten",
+    # Settings export/import
+    card_export="EINSTELLUNGEN",
+    btn_export_settings="💾 Exportieren", btn_import_settings="📂 Importieren",
+    export_done="Einstellungen exportiert!", import_done="Einstellungen importiert!",
+    # Burst mode
+    burst_lbl="Burst-Modus", burst_count="Burst (×)", burst_wait="Burst-Pause (ms)",
+    # Recent profiles
+    recent_profiles="Zuletzt verwendet:",
+    btn_clear_recent="Verlauf löschen",
+    profile_not_found="Profil-Datei nicht gefunden.",
 ),
 "en": dict(
     tab_spam="SPAM", tab_tame="TAME", tab_macro="MACROS",
@@ -380,6 +408,28 @@ S = {
     tray_show="Show", tray_stop="Stop All", tray_quit="Quit",
     btn_minimize_tray="Minimize to Tray",
     overlay_tray_hint="Hide window — Soup Macro keeps running in the background.",
+    # Overlay row labels
+    ov_spam="Spam", ov_tame="Tame", ov_macro="Macro",
+    ov_rec="Recording", ov_play="Playback",
+    # Macro new step types
+    step_type_text="⌨ Text:", step_scroll="🖱 Scroll:",
+    f_text="Text", btn_add_type="+ Type", btn_add_scroll="+ Scroll",
+    scroll_up="↑ Up", scroll_down="↓ Down", f_scroll_amt="Amount",
+    # Macro startup delay
+    f_macro_delay="Startup Delay (s)",
+    # Autostart
+    card_autostart="AUTOSTART",
+    autostart_lbl="Start with Windows",
+    # Settings export/import
+    card_export="SETTINGS",
+    btn_export_settings="💾 Export", btn_import_settings="📂 Import",
+    export_done="Settings exported!", import_done="Settings imported!",
+    # Burst mode
+    burst_lbl="Burst Mode", burst_count="Burst (×)", burst_wait="Burst Pause (ms)",
+    # Recent profiles
+    recent_profiles="Recently used:",
+    btn_clear_recent="Clear history",
+    profile_not_found="Profile file not found.",
 ),
 }
 
@@ -394,6 +444,11 @@ class MacroApp:
         self.root.resizable(True, True)
         self.root.minsize(420, 560)
         self.root.configure(bg=BG)
+        # Restore saved window position
+        cfg0 = load_cfg()
+        if cfg0.get("win_pos"):
+            try: self.root.geometry(cfg0["win_pos"])
+            except: pass
 
         # Runtime state
         self.spam_running  = False
@@ -422,6 +477,8 @@ class MacroApp:
         self._sound_on     = cfg.get("sound", True)
         self._ap_on_init   = cfg.get("autopause", False)
         self._ap_win_init  = cfg.get("autopause_window", "")
+        self._autostart_on = cfg.get("autostart", False)
+        self._win_pos      = cfg.get("win_pos", None)  # saved "WxH+X+Y"
 
         self.kb = KbCtrl()
         self.ms = MsCtrl()
@@ -642,6 +699,23 @@ class MacroApp:
 
         Divider(c, bg=BORDER).pack(fill="x", padx=16, pady=(4,10))
 
+        # Burst mode
+        br = tk.Frame(c, bg=CARD)
+        br.pack(fill="x", padx=16, pady=(0,4))
+        self.spam_burst = tk.BooleanVar(value=False)
+        tk.Checkbutton(br, text=self.t("burst_lbl"), variable=self.spam_burst,
+                       command=self._update_burst_frame,
+                       bg=CARD, fg=TEXT, selectcolor=INPUT, activebackground=CARD,
+                       activeforeground=TEXT, font=("Segoe UI",9),
+                       relief="flat", cursor="hand2").pack(side="left")
+        self._burst_frame = tk.Frame(c, bg=CARD)
+        bfr = tk.Frame(self._burst_frame, bg=CARD)
+        bfr.pack(fill="x", padx=16, pady=(0,8))
+        self._field(bfr, self.t("burst_count"), "spam_burst_count", 3, (2,50,1), w=5).pack(side="left", padx=(0,16))
+        self._field(bfr, self.t("burst_wait"),  "spam_burst_wait",  500, (10,60000,10), w=6).pack(side="left")
+
+        Divider(c, bg=BORDER).pack(fill="x", padx=16, pady=(4,10))
+
         # Startup delay
         self._inrow(c, (self.t("f_delay"), "spam_delay", 0, (0,30,1)))
 
@@ -669,6 +743,12 @@ class MacroApp:
                                   if self._hold_frame.master.winfo_children() else None)
         else:
             self._hold_frame.pack_forget()
+
+    def _update_burst_frame(self):
+        if self.spam_burst.get():
+            self._burst_frame.pack(fill="x")
+        else:
+            self._burst_frame.pack_forget()
 
     # ── TAME tab ───────────────────────────────────────────────
     def _build_tame(self, p):
@@ -761,6 +841,32 @@ class MacroApp:
         SBtn(rc, self.t("btn_add_click"), PURPLE, self._step_add_click).pack(side="left", padx=(0,4))
         SBtn(rc, self.t("btn_pick"), MUTED2, self._step_pick_pos, light=True).pack(side="left")
 
+        # Add: Type text
+        rtt = tk.Frame(c, bg=CARD)
+        rtt.pack(fill="x", padx=16, pady=(0,6))
+        tk.Label(rtt, text=self.t("f_text"), font=("Segoe UI",8),
+                 bg=CARD, fg=MUTED2, width=9, anchor="w").pack(side="left")
+        self.new_type_text = tk.StringVar(value="")
+        self._entry_wrap(rtt, self.new_type_text, w=14)
+        SBtn(rtt, self.t("btn_add_type"), GREEN, self._step_add_type_text).pack(side="left")
+
+        # Add: Scroll
+        rs = tk.Frame(c, bg=CARD)
+        rs.pack(fill="x", padx=16, pady=(0,6))
+        tk.Label(rs, text="🖱 Scroll:", font=("Segoe UI",8),
+                 bg=CARD, fg=MUTED2, width=9, anchor="w").pack(side="left")
+        self.scroll_dir = tk.StringVar(value="up")
+        self._scroll_u = SBtn(rs, self.t("scroll_up"), GREEN, lambda: self._set_scroll_dir("up"))
+        self._scroll_u.pack(side="left", padx=(0,4))
+        self._scroll_d = SBtn(rs, self.t("scroll_down"), BORDER2,
+                              lambda: self._set_scroll_dir("down"), light=True)
+        self._scroll_d.pack(side="left", padx=(0,8))
+        tk.Label(rs, text=self.t("f_scroll_amt"), font=("Segoe UI",8),
+                 bg=CARD, fg=MUTED2).pack(side="left", padx=(0,4))
+        self.scroll_amt = tk.IntVar(value=3)
+        self._spin_wrap(rs, self.scroll_amt, 1, 50, 1, w=4)
+        SBtn(rs, self.t("btn_add_scroll"), BLUE, self._step_add_scroll).pack(side="left", padx=(4,0))
+
         # Add: Label
         rl = tk.Frame(c, bg=CARD)
         rl.pack(fill="x", padx=16, pady=(0,6))
@@ -773,7 +879,7 @@ class MacroApp:
         Divider(c, bg=BORDER).pack(fill="x", padx=16, pady=(4,10))
 
         bot = tk.Frame(c, bg=CARD)
-        bot.pack(fill="x", padx=16, pady=(0,10))
+        bot.pack(fill="x", padx=16, pady=(0,6))
         tk.Label(bot, text=self.t("repeat"), font=("Segoe UI",8),
                  bg=CARD, fg=MUTED2).pack(side="left")
         self.macro_repeat = tk.IntVar(value=0)
@@ -782,6 +888,8 @@ class MacroApp:
                  bg=CARD, fg=MUTED).pack(side="left", padx=(2,12))
         SBtn(bot, self.t("btn_save"), BORDER2, self._macro_save, light=True).pack(side="left", padx=(0,4))
         SBtn(bot, self.t("btn_load"), BORDER2, self._macro_load, light=True).pack(side="left")
+
+        self._inrow(c, (self.t("f_macro_delay"), "macro_delay", 0, (0,30,1)))
 
         self.macro_btn = RoundBtn(c, self.t("btn_macro0"), PURPLE, self.toggle_macro)
         self.macro_btn.pack(fill="x", padx=16, pady=(0,10))
@@ -950,9 +1058,39 @@ class MacroApp:
         # Profile
         cpr = self._card(sc, self.t("card_profile"), BLUE)
         prr = tk.Frame(cpr, bg=CARD)
-        prr.pack(fill="x", padx=16, pady=(0,14))
+        prr.pack(fill="x", padx=16, pady=(0,8))
         SBtn(prr, self.t("btn_save_profile"), GREEN, self._save_profile).pack(side="left", padx=(0,8))
         SBtn(prr, self.t("btn_load_profile"), BLUE,  self._load_profile, light=False).pack(side="left")
+        tk.Label(cpr, text=self.t("recent_profiles"), font=("Segoe UI",8),
+                 bg=CARD, fg=MUTED2).pack(padx=16, pady=(4,2), anchor="w")
+        self._recent_frame = tk.Frame(cpr, bg=CARD)
+        self._recent_frame.pack(fill="x", padx=16, pady=(0,4))
+        rclear = tk.Frame(cpr, bg=CARD)
+        rclear.pack(fill="x", padx=16, pady=(0,12))
+        SBtn(rclear, self.t("btn_clear_recent"), BORDER2,
+             self._clear_recent_profiles, light=True).pack(anchor="w")
+        self._refresh_recent_profiles()
+
+        # Autostart
+        if HAS_WINREG:
+            cas = self._card(sc, self.t("card_autostart"), GREEN)
+            asr = tk.Frame(cas, bg=CARD)
+            asr.pack(fill="x", padx=16, pady=(0,14))
+            self.autostart_var = tk.BooleanVar(value=self._autostart_on)
+            tk.Checkbutton(asr, text=self.t("autostart_lbl"), variable=self.autostart_var,
+                           command=self._toggle_autostart,
+                           bg=CARD, fg=TEXT, selectcolor=INPUT, activebackground=CARD,
+                           activeforeground=TEXT, font=("Segoe UI",9),
+                           relief="flat", cursor="hand2").pack(side="left")
+
+        # Settings Export / Import
+        cex = self._card(sc, self.t("card_export"), MUTED2)
+        exr = tk.Frame(cex, bg=CARD)
+        exr.pack(fill="x", padx=16, pady=(0,14))
+        SBtn(exr, self.t("btn_export_settings"), GREEN,
+             self._export_settings).pack(side="left", padx=(0,8))
+        SBtn(exr, self.t("btn_import_settings"), BLUE,
+             self._import_settings, light=False).pack(side="left")
 
         # Hotkeys
         ch = self._card(sc, self.t("card_hotkeys"), BLUE)
@@ -1011,6 +1149,61 @@ class MacroApp:
         cfg["autopause_window"] = self.autopause_win.get()
         save_cfg(cfg)
 
+    def _toggle_autostart(self):
+        enabled = self.autostart_var.get()
+        cfg = load_cfg(); cfg["autostart"] = enabled; save_cfg(cfg)
+        if not HAS_WINREG: return
+        key_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
+        app_name = "SoupMacro"
+        try:
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, key_path, 0,
+                                 winreg.KEY_SET_VALUE)
+            if enabled:
+                exe = sys.executable
+                winreg.SetValueEx(key, app_name, 0, winreg.REG_SZ, f'"{exe}"')
+            else:
+                try: winreg.DeleteValue(key, app_name)
+                except FileNotFoundError: pass
+            winreg.CloseKey(key)
+        except Exception as ex:
+            messagebox.showerror(self.t("error"), str(ex), parent=self.root)
+            self.autostart_var.set(not enabled)
+
+    def _export_settings(self):
+        p = filedialog.asksaveasfilename(defaultextension=".json",
+            filetypes=[("Settings","*.json")],
+            title=self.t("btn_export_settings"), parent=self.root)
+        if not p: return
+        data = {
+            "config": load_cfg(),
+            "macro_steps": self.macro_steps,
+            "recording": self.recording,
+        }
+        with open(p,"w") as f: json.dump(data,f,indent=2)
+        messagebox.showinfo(self.t("hint"), self.t("export_done"), parent=self.root)
+
+    def _import_settings(self):
+        p = filedialog.askopenfilename(filetypes=[("Settings","*.json")],
+            title=self.t("btn_import_settings"), parent=self.root)
+        if not p: return
+        with open(p) as f: data = json.load(f)
+        if "config" in data:
+            cfg = data["config"]
+            save_cfg(cfg)
+            self._panic_key = cfg.get("panic_key", self._panic_key)
+            try: self._panic_lbl.config(text=self._panic_key.upper())
+            except: pass
+            self._sound_on = cfg.get("sound", True)
+            try: self.sound_var.set(self._sound_on)
+            except: pass
+        if "macro_steps" in data:
+            self.macro_steps = data["macro_steps"]
+            self._refresh_steps()
+        if "recording" in data:
+            self.recording = data["recording"]
+            self._rec_refresh()
+        messagebox.showinfo(self.t("hint"), self.t("import_done"), parent=self.root)
+
     def _begin_panic_capture(self):
         if self._capturing_panic: return
         self._capturing_panic = True
@@ -1055,10 +1248,12 @@ class MacroApp:
         self.spam_key.set("1");     self.spam_interval.set(10)
         self.spam_min.set(8);       self.spam_max.set(12)
         self.spam_delay.set(0);     self.spam_hold.set(False)
-        self.spam_hold_key.set("")
+        self.spam_hold_key.set(""); self.spam_burst.set(False)
+        self.spam_burst_count.set(3); self.spam_burst_wait.set(500)
+        self._update_burst_frame()
         self.tame_key.set("2");     self.tame_wait1.set(7.0)
         self.press_key.set("1");    self.tame_wait2.set(3.0)
-        self.tame_delay.set(0)
+        self.tame_delay.set(0);     self.macro_delay.set(0)
         messagebox.showinfo(self.t("hint"), self.t("reset_done"), parent=self.root)
 
     # ── Overlay ────────────────────────────────────────────────
@@ -1088,13 +1283,14 @@ class MacroApp:
         body = tk.Frame(ov, bg=CARD)
         body.pack(fill="both", expand=True, padx=10, pady=8)
         self._ov_rows = {}
-        for key, label, color in [
-            ("spam",  "Spam",     GREEN),
-            ("tame",  "Tame",     BLUE),
-            ("macro", "Makro",    PURPLE),
-            ("rec",   "Aufnahme", RED),
-            ("play",  "Play",     GREEN),
+        for key, lkey, color in [
+            ("spam",  "ov_spam",  GREEN),
+            ("tame",  "ov_tame",  BLUE),
+            ("macro", "ov_macro", PURPLE),
+            ("rec",   "ov_rec",   RED),
+            ("play",  "ov_play",  GREEN),
         ]:
+            label = self.t(lkey)
             row = tk.Frame(body, bg=CARD); row.pack(fill="x", pady=2)
             dot = tk.Canvas(row, width=8, height=8, bg=CARD, highlightthickness=0)
             dot.pack(side="left", padx=(0,6))
@@ -1150,6 +1346,12 @@ class MacroApp:
 
     def _quit(self):
         """Stop all threads, destroy window, force-exit the process."""
+        # 0. Save window position
+        try:
+            cfg = load_cfg()
+            cfg["win_pos"] = self.root.geometry()
+            save_cfg(cfg)
+        except: pass
         # 1. Signal all loops to stop
         self.spam_running = self.tame_running = self.macro_running = False
         self.rec_running  = self.play_running = False
@@ -1177,17 +1379,26 @@ class MacroApp:
             "spam_random": self.spam_random.get(), "spam_min": self.spam_min.get(),
             "spam_max": self.spam_max.get(), "spam_hold": self.spam_hold.get(),
             "spam_hold_key": self.spam_hold_key.get(), "spam_delay": self.spam_delay.get(),
+            "spam_burst": self.spam_burst.get(),
+            "spam_burst_count": self.spam_burst_count.get(),
+            "spam_burst_wait":  self.spam_burst_wait.get(),
             "tame_key": self.tame_key.get(), "tame_wait1": self.tame_wait1.get(),
             "press_key": self.press_key.get(), "tame_wait2": self.tame_wait2.get(),
             "tame_delay": self.tame_delay.get(),
             "macro_steps": self.macro_steps, "macro_repeat": self.macro_repeat.get(),
+            "macro_delay": self.macro_delay.get(),
+            "recording": self.recording, "rec_repeat": self.rec_repeat.get(),
         }
         with open(p,"w") as f: json.dump(data,f,indent=2)
+        self._add_recent_profile(p)
         messagebox.showinfo(self.t("hint"), "✓ Profile saved", parent=self.root)
 
-    def _load_profile(self):
-        p = filedialog.askopenfilename(filetypes=[("Profile","*.json")], parent=self.root)
+    def _load_profile(self, path=None):
+        p = path or filedialog.askopenfilename(filetypes=[("Profile","*.json")], parent=self.root)
         if not p: return
+        if not os.path.exists(p):
+            messagebox.showerror(self.t("error"), self.t("profile_not_found"), parent=self.root)
+            return
         with open(p) as f: d = json.load(f)
         self.spam_key.set(d.get("spam_key","1"))
         self.spam_interval.set(d.get("spam_interval",10))
@@ -1196,6 +1407,9 @@ class MacroApp:
         self.spam_hold.set(d.get("spam_hold",False))
         self.spam_hold_key.set(d.get("spam_hold_key",""))
         self.spam_delay.set(d.get("spam_delay",0))
+        self.spam_burst.set(d.get("spam_burst",False))
+        self.spam_burst_count.set(d.get("spam_burst_count",3))
+        self.spam_burst_wait.set(d.get("spam_burst_wait",500))
         self.tame_key.set(d.get("tame_key","2"))
         self.tame_wait1.set(d.get("tame_wait1",7.0))
         self.press_key.set(d.get("press_key","1"))
@@ -1203,11 +1417,45 @@ class MacroApp:
         self.tame_delay.set(d.get("tame_delay",0))
         self.macro_steps = d.get("macro_steps",[])
         self.macro_repeat.set(d.get("macro_repeat",0))
+        self.macro_delay.set(d.get("macro_delay",0))
+        self.recording = d.get("recording", self.recording)
+        self.rec_repeat.set(d.get("rec_repeat",1))
         use_rnd = d.get("spam_random", False)
         self._set_ivmode(use_rnd)
         self._update_hold_frame()
+        self._update_burst_frame()
         self._refresh_steps()
+        self._rec_refresh()
+        self._add_recent_profile(p)
         messagebox.showinfo(self.t("hint"), "✓ Profile loaded", parent=self.root)
+
+    def _add_recent_profile(self, path):
+        cfg = load_cfg()
+        recent = cfg.get("recent_profiles", [])
+        if path in recent: recent.remove(path)
+        recent.insert(0, path)
+        cfg["recent_profiles"] = recent[:5]
+        save_cfg(cfg)
+        self._refresh_recent_profiles()
+
+    def _refresh_recent_profiles(self):
+        if not hasattr(self, "_recent_frame"): return
+        for w in self._recent_frame.winfo_children(): w.destroy()
+        recent = load_cfg().get("recent_profiles", [])
+        if not recent:
+            tk.Label(self._recent_frame, text="—", font=("Segoe UI",8),
+                     bg=CARD, fg=MUTED).pack(anchor="w")
+            return
+        for p in recent:
+            name = os.path.basename(p)
+            btn = SBtn(self._recent_frame, name, BORDER2,
+                       lambda pp=p: self._load_profile(pp), light=True)
+            btn.configure(width=min(200, len(name)*7+16))
+            btn.pack(anchor="w", pady=1)
+
+    def _clear_recent_profiles(self):
+        cfg = load_cfg(); cfg["recent_profiles"] = []; save_cfg(cfg)
+        self._refresh_recent_profiles()
 
     # ── Recording ──────────────────────────────────────────────
     def toggle_record(self):
@@ -1373,6 +1621,25 @@ class MacroApp:
         txt = self.new_label.get().strip()
         if txt: self.macro_steps.append({"type":"label","text":txt}); self._refresh_steps()
 
+    def _step_add_type_text(self):
+        txt = self.new_type_text.get()
+        if txt: self.macro_steps.append({"type":"type_text","text":txt}); self._refresh_steps()
+
+    def _step_add_scroll(self):
+        self.macro_steps.append({"type":"scroll",
+                                  "direction":self.scroll_dir.get(),
+                                  "amount":self.scroll_amt.get()})
+        self._refresh_steps()
+
+    def _set_scroll_dir(self, d):
+        self.scroll_dir.set(d)
+        if d == "up":
+            self._scroll_u.set(color=GREEN,   fg=BG)
+            self._scroll_d.set(color=BORDER2, fg=TEXT)
+        else:
+            self._scroll_u.set(color=BORDER2, fg=TEXT)
+            self._scroll_d.set(color=GREEN,   fg=BG)
+
     def _step_pick_pos(self):
         messagebox.showinfo(self.t("hint"), self.t("pick_hint"), parent=self.root)
         def _pick():
@@ -1415,6 +1682,11 @@ class MacroApp:
                 self.step_list.insert(tk.END, f"  {i}.  {self.t('step_click')}  {s['button']} ({s['x']},{s['y']})")
             elif s["type"]=="label":
                 self.step_list.insert(tk.END, f"  {i}.  {self.t('step_label')}  {s['text']}")
+            elif s["type"]=="type_text":
+                self.step_list.insert(tk.END, f"  {i}.  {self.t('step_type_text')}  {s['text']}")
+            elif s["type"]=="scroll":
+                d = self.t("scroll_up") if s["direction"]=="up" else self.t("scroll_down")
+                self.step_list.insert(tk.END, f"  {i}.  {self.t('step_scroll')}  {d} ×{s['amount']}")
 
     def _macro_save(self):
         p = filedialog.asksaveasfilename(defaultextension=".json",
@@ -1544,22 +1816,38 @@ class MacroApp:
         keys = [k.strip() for k in raw.split(",") if k.strip()]
         if not keys: keys = ["1"]
 
+        burst_mode  = self.spam_burst.get()
         self.root.after(0, lambda: self.spam_st.set(self.t("st_running"), True))
         while self.spam_running:
             if self._should_pause(): time.sleep(0.05); continue
             if hold_mode and not self._hold_pressed: time.sleep(0.01); continue
-            for k in keys:
-                if not self.spam_running: break
-                if hold_mode and not self._hold_pressed: break
-                try:
-                    sk = SPECIAL_KEYS.get(k.lower())
-                    self.kb.tap(sk if sk else k[0])
-                except: pass
-            if self.spam_random.get():
-                ms = random.uniform(self.spam_min.get(), self.spam_max.get())
+            if burst_mode:
+                # Burst: press N times with ~5ms between presses, then wait burst_wait
+                n = max(1, int(self.spam_burst_count.get()))
+                for _ in range(n):
+                    if not self.spam_running: break
+                    for k in keys:
+                        if not self.spam_running: break
+                        try:
+                            sk = SPECIAL_KEYS.get(k.lower())
+                            self.kb.tap(sk if sk else k[0])
+                        except: pass
+                    time.sleep(0.005)
+                pause_ms = self.spam_burst_wait.get()
+                time.sleep(max(0.001, pause_ms / 1000.0))
             else:
-                ms = self.spam_interval.get()
-            time.sleep(max(0.001, ms / 1000.0))
+                for k in keys:
+                    if not self.spam_running: break
+                    if hold_mode and not self._hold_pressed: break
+                    try:
+                        sk = SPECIAL_KEYS.get(k.lower())
+                        self.kb.tap(sk if sk else k[0])
+                    except: pass
+                if self.spam_random.get():
+                    ms = random.uniform(self.spam_min.get(), self.spam_max.get())
+                else:
+                    ms = self.spam_interval.get()
+                time.sleep(max(0.001, ms / 1000.0))
 
         self.spam_running = False
         self.root.after(0, lambda: self.spam_btn.set(self.t("btn_spam0"), GREEN))
@@ -1588,8 +1876,9 @@ class MacroApp:
             self.tame_cd = end - time.time(); time.sleep(0.05)
 
     def _macro_loop(self):
-        delay = self.tame_delay.get() if hasattr(self,"tame_delay") else 0
-        # macros use their own delay implicitly via steps; no extra countdown here
+        delay = self.macro_delay.get() if hasattr(self, "macro_delay") else 0
+        if delay > 0: self._countdown(delay, "macro")
+        if not self.macro_running: return
         repeat = self.macro_repeat.get(); count = 0
         self.root.after(0, lambda: self.macro_st.set(self.t("st_running"), True))
         while self.macro_running:
@@ -1609,6 +1898,18 @@ class MacroApp:
                         b = Button.left if step["button"]=="left" else Button.right
                         self.ms.position = (step["x"], step["y"])
                         self.ms.click(b)
+                    except: pass
+                elif step["type"] == "type_text":
+                    for ch in step.get("text",""):
+                        if not self.macro_running: break
+                        try: self.kb.type(ch)
+                        except: pass
+                        time.sleep(0.02)
+                elif step["type"] == "scroll":
+                    try:
+                        dy = step.get("amount", 3)
+                        if step.get("direction","up") == "down": dy = -dy
+                        self.ms.scroll(0, dy)
                     except: pass
                 elif step["type"] == "label":
                     pass  # comment — skip
@@ -1654,6 +1955,9 @@ class MacroApp:
         cfg = load_cfg(); cfg["lang"] = nl; save_cfg(cfg)
         self.spam_running = self.tame_running = self.macro_running = False
         self.rec_running  = self.play_running = False
+        for lst in (self._kb_rec, self._ms_rec, self._hold_lst):
+            try: lst.stop()
+            except: pass
         self.root.after(120, self._restart)
 
     def _restart(self):

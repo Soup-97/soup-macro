@@ -156,6 +156,47 @@
 
   <div class="timeline ani" style="animation-delay:.15s">
 
+    <!-- v1.7 -->
+    <div class="tl-entry">
+      <div class="tl-rail">
+        <div class="tl-dot" style="background:var(--green);border-color:var(--green)"></div>
+        <div class="tl-line" style="background:linear-gradient(var(--green),var(--green))"></div>
+      </div>
+      <div class="tl-body">
+        <div class="v-card" style="border-color:rgba(52,211,153,.3)">
+          <div class="v-header">
+            <span class="v-badge" style="background:rgba(52,211,153,.12);color:var(--green);border-color:rgba(52,211,153,.4)">v1.7</span>
+            <span class="v-date" data-i18n="v17.date">May 23, 2026</span>
+            <span class="v-tag" style="background:rgba(52,211,153,.15);color:var(--green)" data-i18n="tag.latest">Latest</span>
+          </div>
+
+          <div class="change-group">
+            <div class="change-group-label" style="color:var(--green)" data-i18n="lbl.new">New Features</div>
+            <div class="change-list">
+              <div class="change-item"><span class="change-icon">✦</span><span data-i18n="v17.n1"><strong>Burst Mode (Spam)</strong> — Press a key N times rapidly, then pause; perfect for burst-fire actions</span></div>
+              <div class="change-item"><span class="change-icon">✦</span><span data-i18n="v17.n2"><strong>Type Text step (Macro)</strong> — New macro step that types a full string character by character</span></div>
+              <div class="change-item"><span class="change-icon">✦</span><span data-i18n="v17.n3"><strong>Scroll step (Macro)</strong> — Scroll up or down by a configurable number of notches</span></div>
+              <div class="change-item"><span class="change-icon">✦</span><span data-i18n="v17.n4"><strong>Macro Startup Delay</strong> — Countdown before macro execution begins (like Spam &amp; Tame)</span></div>
+              <div class="change-item"><span class="change-icon">✦</span><span data-i18n="v17.n5"><strong>Window Position Memory</strong> — The app remembers its last position between sessions</span></div>
+              <div class="change-item"><span class="change-icon">✦</span><span data-i18n="v17.n6"><strong>Autostart with Windows</strong> — Optional registry entry to launch Soup Macro on login</span></div>
+              <div class="change-item"><span class="change-icon">✦</span><span data-i18n="v17.n7"><strong>Settings Export / Import</strong> — Back up and restore all settings (config + macro steps + recording) as one JSON file</span></div>
+              <div class="change-item"><span class="change-icon">✦</span><span data-i18n="v17.n8"><strong>Recent Profiles</strong> — Quick-access list of the last 5 used profiles in Settings</span></div>
+              <div class="change-item"><span class="change-icon">✦</span><span data-i18n="v17.n9"><strong>Profiles now include recordings</strong> — Save/load macro recording events as part of a profile</span></div>
+            </div>
+          </div>
+
+          <div class="change-group">
+            <div class="change-group-label" style="color:var(--blue)" data-i18n="lbl.fix">Bug Fixes</div>
+            <div class="change-list">
+              <div class="change-item"><span class="change-icon" style="color:var(--blue)">⚡</span><span data-i18n="v17.f1"><strong>Overlay labels hardcoded in German</strong> — Labels now use the i18n system and update when switching language</span></div>
+              <div class="change-item"><span class="change-icon" style="color:var(--blue)">⚡</span><span data-i18n="v17.f2"><strong>Language switch left pynput listeners running</strong> — All listeners are now properly stopped before the UI restarts</span></div>
+              <div class="change-item"><span class="change-icon" style="color:var(--blue)">⚡</span><span data-i18n="v17.f3"><strong>Macro loop read wrong delay variable</strong> — <code>_macro_loop</code> was reading <code>tame_delay</code> instead of its own delay; macro now has its own configurable startup delay</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- v1.6 -->
     <div class="tl-entry">
       <div class="tl-rail">
@@ -167,7 +208,6 @@
           <div class="v-header">
             <span class="v-badge" style="background:rgba(52,211,153,.12);color:var(--green);border-color:rgba(52,211,153,.4)">v1.6</span>
             <span class="v-date" data-i18n="v16.date">May 22, 2026</span>
-            <span class="v-tag" style="background:rgba(52,211,153,.15);color:var(--green)" data-i18n="tag.latest">Latest</span>
           </div>
 
           <div class="change-group">
@@ -201,7 +241,6 @@
           <div class="v-header">
             <span class="v-badge" style="background:rgba(52,211,153,.12);color:var(--green);border-color:rgba(52,211,153,.4)">v1.5</span>
             <span class="v-date" data-i18n="v15.date">May 22, 2026</span>
-            <span class="v-tag" style="background:rgba(52,211,153,.15);color:var(--green)" data-i18n="tag.latest">Latest</span>
           </div>
 
           <div class="change-group">
@@ -321,9 +360,22 @@ const STRINGS = {
     'nav.changelog':'Changelog','nav.download':'Download',
     'cl.eyebrow':'Changelog','cl.title':'Version History',
     'cl.sub':'All changes, fixes and new features at a glance.',
+    'v17.date':'May 23, 2026','v16.date':'May 22, 2026',
     'v15.date':'May 22, 2026','v14.date':'May 20, 2026','v13.date':'May 2026',
     'tag.latest':'Latest','tag.installer':'Installer Release','tag.initial':'Initial Release',
     'lbl.new':'New Features','lbl.fix':'Bug Fixes',
+    'v17.n1':'<strong>Burst Mode (Spam)</strong> — Press a key N times rapidly, then pause; perfect for burst-fire actions',
+    'v17.n2':'<strong>Type Text step (Macro)</strong> — New macro step that types a full string character by character',
+    'v17.n3':'<strong>Scroll step (Macro)</strong> — Scroll up or down by a configurable number of notches',
+    'v17.n4':'<strong>Macro Startup Delay</strong> — Countdown before macro execution begins (like Spam &amp; Tame)',
+    'v17.n5':'<strong>Window Position Memory</strong> — The app remembers its last position between sessions',
+    'v17.n6':'<strong>Autostart with Windows</strong> — Optional registry entry to launch Soup Macro on login',
+    'v17.n7':'<strong>Settings Export / Import</strong> — Back up and restore all settings as one JSON file',
+    'v17.n8':'<strong>Recent Profiles</strong> — Quick-access list of the last 5 used profiles in Settings',
+    'v17.n9':'<strong>Profiles include recordings</strong> — Save/load macro recording events as part of a profile',
+    'v17.f1':'<strong>Overlay labels hardcoded in German</strong> — Labels now use the i18n system and update when switching language',
+    'v17.f2':'<strong>Language switch left pynput listeners running</strong> — All listeners are now properly stopped before the UI restarts',
+    'v17.f3':'<strong>Macro loop read wrong delay variable</strong> — <code>_macro_loop</code> was reading <code>tame_delay</code> instead of its own; macro now has its own configurable startup delay',
     'v15.n1':'<strong>System Tray</strong> — Closing the window minimizes to tray, with show/stop/quit menu',
     'v15.n2':'<strong>Overlay Window</strong> — Draggable, always-on-top status display for all modes',
     'v15.n3':'<strong>Sound Feedback</strong> — Beep on start/stop (configurable)',
@@ -360,9 +412,22 @@ const STRINGS = {
     'nav.changelog':'Changelog','nav.download':'Download',
     'cl.eyebrow':'Changelog','cl.title':'Versionshistorie',
     'cl.sub':'Alle Änderungen, Fixes und neuen Features auf einen Blick.',
+    'v17.date':'23. Mai 2026','v16.date':'22. Mai 2026',
     'v15.date':'22. Mai 2026','v14.date':'20. Mai 2026','v13.date':'Mai 2026',
     'tag.latest':'Aktuell','tag.installer':'Installer Release','tag.initial':'Erstveröffentlichung',
     'lbl.new':'Neue Features','lbl.fix':'Fehlerbehebungen',
+    'v17.n1':'<strong>Burst-Modus (Spam)</strong> — Taste N-mal schnell drücken, dann pausieren; ideal für Burst-Fire-Aktionen',
+    'v17.n2':'<strong>Text tippen (Makro)</strong> — Neuer Makro-Schritt, der einen vollständigen Text Zeichen für Zeichen eintippt',
+    'v17.n3':'<strong>Scroll-Schritt (Makro)</strong> — Scrollt hoch oder runter um eine konfigurierbare Anzahl Stufen',
+    'v17.n4':'<strong>Makro-Startverzögerung</strong> — Countdown bevor der Makro beginnt (wie bei Spam &amp; Tame)',
+    'v17.n5':'<strong>Fensterposition merken</strong> — Die App merkt sich ihre letzte Position zwischen Sitzungen',
+    'v17.n6':'<strong>Autostart mit Windows</strong> — Optionaler Registry-Eintrag um Soup Macro beim Login zu starten',
+    'v17.n7':'<strong>Einstellungen Export / Import</strong> — Alle Einstellungen als eine JSON-Datei sichern und wiederherstellen',
+    'v17.n8':'<strong>Zuletzt verwendete Profile</strong> — Schnellzugriff auf die letzten 5 Profile in den Einstellungen',
+    'v17.n9':'<strong>Profile enthalten Aufnahmen</strong> — Makro-Aufnahmen werden jetzt mit dem Profil gespeichert',
+    'v17.f1':'<strong>Overlay-Labels auf Deutsch hardcoded</strong> — Labels nutzen jetzt das i18n-System und aktualisieren sich beim Sprachwechsel',
+    'v17.f2':'<strong>Sprachwechsel ließ pynput-Listener laufen</strong> — Alle Listener werden jetzt korrekt gestoppt bevor die UI neustartet',
+    'v17.f3':'<strong>Makro-Loop las falsche Delay-Variable</strong> — <code>_macro_loop</code> las <code>tame_delay</code> statt eigenem Delay; Makro hat jetzt eigene konfigurierbare Startverzögerung',
     'v15.n1':'<strong>System-Tray</strong> — Fenster schließen minimiert ins Tray mit Zeigen/Stoppen/Beenden-Menü',
     'v15.n2':'<strong>Overlay-Fenster</strong> — Schwebende, immer-sichtbare Statusanzeige für alle Modi',
     'v15.n3':'<strong>Sound-Feedback</strong> — Beep bei Start/Stop (konfigurierbar)',
