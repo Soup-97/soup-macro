@@ -2020,17 +2020,21 @@ class MacroApp:
             self.root.after(0, lambda: self.upd_lbl.config(text=self.t("upd_done"), fg=GREEN))
 
             if is_installer:
-                # Run installer silently — replaces exe, keeps config in %APPDATA%
-                subprocess.Popen([new, "/VERYSILENT", "/NORESTART"])
+                # Run installer silently.
+                # /FORCECLOSEAPPLICATIONS — installer force-closes any running instance
+                # We also call _quit() shortly after so os._exit(0) frees the .exe on disk
+                subprocess.Popen([new, "/VERYSILENT", "/NORESTART",
+                                  "/FORCECLOSEAPPLICATIONS"])
+                self.root.after(600, self._quit)
             else:
-                # Legacy: batch-swap raw exe
+                # Legacy: batch-swap raw exe — wait 2 s for this process to exit first
                 exe = sys.executable
                 bat = tempfile.mktemp(suffix=".bat")
                 with open(bat, "w") as f:
                     f.write(f'@echo off\ntimeout /t 2 /nobreak>nul\n'
                             f'move /y "{new}" "{exe}"\nstart "" "{exe}"\ndel "%~f0"\n')
                 subprocess.Popen(["cmd","/c",bat], creationflags=subprocess.CREATE_NO_WINDOW)
-            self.root.after(1500, self.root.destroy)
+                self.root.after(600, self._quit)
         except Exception as ex:
             self.root.after(0, lambda: messagebox.showerror(
                 self.t("error"), str(ex), parent=self.root))
